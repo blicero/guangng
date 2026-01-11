@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-11 12:49:00 krylon>
+// Time-stamp: <2026-01-11 16:16:21 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -34,10 +34,10 @@ import (
 // TimestampFormat is the default format for timestamp used throughout the
 // application.
 const (
-	AppName                  = "Guangng"
+	AppName                  = "GuangNG"
 	Version                  = "0.0.1"
 	Debug                    = true
-	DefaultPort              = 2980
+	DefaultPort              = 6942
 	TimestampFormatMinute    = "2006-01-02 15:04"
 	TimestampFormat          = "2006-01-02 15:04:05"
 	TimestampFormatSubSecond = "2006-01-02 15:04:05.0000 MST"
