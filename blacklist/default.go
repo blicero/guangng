@@ -2,9 +2,11 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 14:54:47 krylon>
+// Time-stamp: <2026-01-12 15:12:10 krylon>
 
 package blacklist
+
+// This files contains the default lists of blacklisted names and IP ranges.
 
 var defaultNamePatterns = []string{
 	"\\bdiu?p-?\\d*\\.",
