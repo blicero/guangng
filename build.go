@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 15:11:03 krylon>
+// Time-stamp: <2026-01-12 15:21:10 krylon>
 
 //go:build ignore
 // +build ignore
@@ -59,6 +59,7 @@ var candidates = map[string][]string{
 	"generate": {
 		"common",
 		"logdomain",
+		"database/query",
 	},
 	"test": {
 		"blacklist",
@@ -68,12 +69,16 @@ var candidates = map[string][]string{
 		"common",
 		"model",
 		"blacklist",
+		"database",
+		"database/query",
 	},
 	"lint": {
 		"logdomain",
 		"common",
 		"model",
 		"blacklist",
+		"database",
+		"database/query",
 	},
 }
 
