@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 14:40:21 krylon>
+// Time-stamp: <2026-01-12 15:00:45 krylon>
 
 package blacklist
 
@@ -13,20 +13,23 @@ import (
 	"sync/atomic"
 )
 
-type NameBlacklistItem struct {
+// BlacklistItemName is a pattern to match hostnames.
+type BlacklistItemName struct {
 	HitCount atomic.Int32
 	pattern  *regexp.Regexp
 }
 
-func NewNameItem(pattern string) *NameBlacklistItem {
-	var item = &NameBlacklistItem{
+// NewNameItem creates a new BlacklistItemName.
+func NewNameItem(pattern string) *BlacklistItemName {
+	var item = &BlacklistItemName{
 		pattern: regexp.MustCompile(pattern),
 	}
 
 	return item
 } // func NewNameItem(pattern string) *NameBlacklistItem
 
-func (i *NameBlacklistItem) Match(name string) bool {
+// Match returns true if the item's pattern matches the given hostname.
+func (i *BlacklistItemName) Match(name string) bool {
 	if i.pattern.MatchString(name) {
 		i.HitCount.Add(1)
 		return true
@@ -35,7 +38,7 @@ func (i *NameBlacklistItem) Match(name string) bool {
 	return false
 } // func (i *NameBlacklistItem) Match(name string) bool
 
-type NameItemList []*NameBlacklistItem
+type NameItemList []*BlacklistItemName
 
 func (nl NameItemList) Len() int      { return len(nl) }
 func (nl NameItemList) Swap(i, j int) { nl[i], nl[j] = nl[j], nl[i] }
@@ -43,14 +46,14 @@ func (nl NameItemList) Less(i, j int) bool {
 	return nl[i].HitCount.Load() < nl[j].HitCount.Load()
 } // func (nl NameItemList) Less(i, j int) bool
 
-type NameBlacklist struct {
-	items []*NameBlacklistItem
+type BlacklistName struct {
+	items NameItemList
 	lock  sync.Mutex
 }
 
-func NewNameBlacklist() *NameBlacklist {
-	var list = &NameBlacklist{
-		items: make([]*NameBlacklistItem, len(defaultNamePatterns)),
+func NewNameBlacklist() *BlacklistName {
+	var list = &BlacklistName{
+		items: make(NameItemList, len(defaultNamePatterns)),
 	}
 
 	for i, p := range defaultNamePatterns {
@@ -60,11 +63,11 @@ func NewNameBlacklist() *NameBlacklist {
 	return list
 } // func NewNameBlacklist() *NameBlacklist
 
-func (bl *NameBlacklist) Match(name string) bool {
+func (bl *BlacklistName) Match(name string) bool {
 	for _, i := range bl.items {
 		if status := i.Match(name); status {
 			bl.lock.Lock()
-			sort.Sort(NameItemList(bl.items))
+			sort.Sort(bl.items)
 			bl.lock.Unlock()
 			return true
 		}
