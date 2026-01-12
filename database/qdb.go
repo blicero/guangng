@@ -2,13 +2,12 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 16:02:38 krylon>
+// Time-stamp: <2026-01-12 16:26:17 krylon>
 
 package database
 
 import "github.com/blicero/guangng/database/query"
 
-// nolint: unused
 var qdb = map[query.ID]string{
 	query.HostAdd: `
 INSERT INTO host (addr, name, added, source)

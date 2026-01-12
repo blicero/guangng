@@ -2,11 +2,11 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 16:09:44 krylon>
+// Time-stamp: <2026-01-12 16:26:25 krylon>
 
 package database
 
-var qInit = []string{ // nolint: unused
+var qInit = []string{
 	`
 CREATE TABLE host (
     id INTEGER PRIMARY KEY,
