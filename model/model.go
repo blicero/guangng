@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-11 17:48:27 krylon>
+// Time-stamp: <2026-01-12 15:32:34 krylon>
 
 // Package model provides the data types our application deals with.
 package model
@@ -17,7 +17,7 @@ import (
 type HostSource uint8
 
 const (
-	Generator HostSource = iota
+	Generator HostSource = iota + 1
 	XFR
 	MX
 	NS
@@ -77,4 +77,14 @@ type Zone struct {
 	Started  time.Time
 	Finished time.Time
 	Status   string
+}
+
+// Service represents a scanned port (success or not).
+type Service struct {
+	ID        int64
+	HostID    int64
+	Port      uint16
+	Success   bool
+	Response  string
+	Timestamp time.Time
 }
