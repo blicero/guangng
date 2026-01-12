@@ -2,24 +2,26 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 15:37:38 krylon>
+// Time-stamp: <2026-01-12 16:09:44 krylon>
 
 package database
 
-var qInit = []string{
+var qInit = []string{ // nolint: unused
 	`
 CREATE TABLE host (
     id INTEGER PRIMARY KEY,
     addr TEXT UNIQUE NOT NULL,
-    name NOT NULL,
+    name TEXT NOT NULL,
     added INTEGER NOT NULL,
     last_contact INTEGER NOT NULL DEFAULT 0,
     sysname TEXT NOT NULL DEFAULT '',
+    location TEXT NOT NULL DEFAULT '',
     source INTEGER NOT NULL,
     CHECK (source BETWEEN 1 AND 5)
 ) STRICT
 `,
 	"CREATE INDEX host_contact_idx ON host (last_contact)",
+	"CREATE UNIQUE INDEX host_addr_idx ON host (addr)",
 	`
 CREATE TABLE svc (
     id INTEGER PRIMARY KEY,
