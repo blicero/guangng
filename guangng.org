@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-01-11 18:21:56 krylon>
+# Time-stamp: <2026-01-12 15:01:34 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -15,14 +15,15 @@
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-01-11 So 18:21]
+   #+CAPTION: Clock summary at [2026-01-12 Mo 15:01]
    | Headline               | Time   |        |      |
    |------------------------+--------+--------+------|
-   | *Total time*           | *1:30* |        |      |
+   | *Total time*           | *2:26* |        |      |
    |------------------------+--------+--------+------|
-   | *GuangNG [0/0]*        | *1:30* |        |      |
-   | \_  /Components [0/0]/ |        | /1:30/ |      |
+   | *GuangNG [0/0]*        | *2:26* |        |      |
+   | \_  /Components [0/0]/ |        | /2:26/ |      |
    | \_    Model [0/0]      |        |        | 1:30 |
+   | \_    Blacklist [0/0]  |        |        | 0:56 |
    #+END:
 ** Components [0/0]
    :PROPERTIES:
@@ -46,6 +47,9 @@
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY:
+    :END:
+    :LOGBOOK:
+    CLOCK: [2026-01-12 Mo 14:05]--[2026-01-12 Mo 15:01] =>  0:56
     :END:
 *** Generator [0/0]
     :PROPERTIES:
