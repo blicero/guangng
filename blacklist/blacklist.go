@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-11 18:21:49 krylon>
+// Time-stamp: <2026-01-12 14:22:16 krylon>
 
 package blacklist
 
 import (
 	"regexp"
+	"sort"
 	"sync"
 	"sync/atomic"
 )
@@ -23,15 +24,23 @@ type NameBlacklistItem struct {
 
 func (i *NameBlacklistItem) Match(name string) bool {
 	if i.pattern.MatchString(name) {
-		i.HitCount.Inc()
+		i.HitCount.Add(1)
 		return true
 	}
 
 	return false
 } // func (i *NameBlacklistItem) Match(name string) bool
 
+type NameItemList []*NameBlacklistItem
+
+func (nl NameItemList) Len() int      { return len(nl) }
+func (nl NameItemList) Swap(i, j int) { nl[i], nl[j] = nl[j], nl[i] }
+func (nl NameItemList) Less(i, j int) bool {
+	return nl[i].HitCount.Load() < nl[j].HitCount.Load()
+} // func (nl NameItemList) Less(i, j int) bool
+
 type NameBlacklist struct {
-	items []NameBlacklistItem
+	items []*NameBlacklistItem
 	lock  sync.Mutex
 }
 
@@ -39,6 +48,11 @@ func (bl *NameBlacklist) Match(name string) bool {
 	for _, i := range bl.items {
 		if status := i.Match(name); status {
 			bl.lock.Lock()
+			sort.Sort(NameItemList(bl.items))
+			bl.lock.Unlock()
+			return true
 		}
 	}
-}
+
+	return false
+} // func (bl *NameBlacklist) Match(name string) bool
