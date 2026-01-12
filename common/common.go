@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-11 16:16:21 krylon>
+// Time-stamp: <2026-01-12 22:31:16 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -97,6 +97,8 @@ var LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppNa
 // DbPath is the filename of the database.
 var DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
 
+var CachePath = filepath.Join(BaseDir, "cache.d")
+
 var CfgPath = filepath.Join(BaseDir, fmt.Sprintf("%s.toml", strings.ToLower(AppName)))
 
 // InitApp performs some basic preparations for the application to run.
@@ -110,7 +112,14 @@ func InitApp() error {
 
 	LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppName)))
 	DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
+	CachePath = filepath.Join(BaseDir, "cache.d")
 	CfgPath = filepath.Join(BaseDir, fmt.Sprintf("%s.toml", strings.ToLower(AppName)))
+
+	if err = os.Mkdir(CachePath, 0700); err != nil && !os.IsExist(err) {
+		return fmt.Errorf("error creating cache directory %s: %s",
+			CachePath,
+			err.Error())
+	}
 
 	return nil
 } // func InitApp() error

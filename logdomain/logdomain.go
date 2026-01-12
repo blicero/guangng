@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-11 12:50:50 krylon>
+// Time-stamp: <2026-01-12 22:38:45 krylon>
 
 package logdomain
 
@@ -17,6 +17,7 @@ const (
 	DBPool
 	Web
 	Generator
+	IPCache
 	Blacklist
 	XFR
 	Scanner
@@ -30,6 +31,7 @@ func AllDomains() []ID {
 		DBPool,
 		Web,
 		Generator,
+		IPCache,
 		Blacklist,
 		XFR,
 		Scanner,
