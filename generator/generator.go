@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 22:42:15 krylon>
+// Time-stamp: <2026-01-14 19:41:08 krylon>
 
 package generator
 
@@ -38,5 +38,23 @@ func openCache() (*cache, error) {
 } // func openCache() (*cache, error)
 
 type Generator struct {
-	log *log.Logger
+	log   *log.Logger
+	cache *cache
 }
+
+func New() (*Generator, error) {
+	var (
+		err error
+		gen = new(Generator)
+	)
+
+	if gen.log, err = common.GetLogger(logdomain.Generator); err != nil {
+		return nil, err
+	} else if gen.cache, err = openCache(); err != nil {
+		gen.log.Printf("[ERROR] Failed to open cache: %s\n",
+			err.Error())
+		return nil, err
+	}
+
+	return gen, nil
+} // func New() (*Generator, error)
