@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 16:26:17 krylon>
+// Time-stamp: <2026-01-15 21:12:42 krylon>
 
 package database
 
@@ -73,5 +73,20 @@ WHERE id = ?
 UPDATE host
 SET location = ?
 WHERE id = ?
+`,
+	query.XFRAdd: `
+INSERT INTO xfr (name, added)
+         VALUES (   ?,     ?)
+RETURNING id
+`,
+	query.XFRGetByName: `
+SELECT
+    id,
+    added,
+    COALESCE(start, -1),
+    COALESCE(end, -1),
+    status
+FROM xfr
+WHERE name = ?
 `,
 }
