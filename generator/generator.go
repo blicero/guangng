@@ -2,15 +2,23 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-14 19:41:08 krylon>
+// Time-stamp: <2026-01-15 18:53:11 krylon>
 
 package generator
 
 import (
+	"crypto/rand"
 	"log"
+	"net"
+	"sync/atomic"
+	"time"
 
+	"github.com/blicero/guangng/blacklist"
 	"github.com/blicero/guangng/common"
+	"github.com/blicero/guangng/database"
 	"github.com/blicero/guangng/logdomain"
+	"github.com/blicero/guangng/model"
+	"github.com/blicero/guangng/model/hsrc"
 	"github.com/dgraph-io/badger"
 )
 
@@ -37,15 +45,58 @@ func openCache() (*cache, error) {
 	return ipcache, nil
 } // func openCache() (*cache, error)
 
+func (c *cache) check(addr net.IP) (bool, error) {
+	var (
+		err     error
+		present bool
+	)
+
+	err = c.db.Update(func(tx *badger.Txn) error {
+		if _, err := tx.Get(addr); err == badger.ErrKeyNotFound {
+			var val = []byte{0x1}
+			if err = tx.Set(addr, val); err != nil {
+				c.log.Printf("[ERROR] Failed to add address %s to cache: %s\n",
+					addr,
+					err.Error())
+				return err
+			}
+
+		} else if err != nil {
+			c.log.Printf("[ERROR] Failed to lookup %s in cache: %s\n",
+				addr,
+				err.Error)
+			return err
+		} else {
+			present = true
+		}
+
+		return nil
+	})
+
+	return present, err
+} // func (c *cache) check(addr net.IP) bool
+
 type Generator struct {
-	log   *log.Logger
-	cache *cache
+	log        *log.Logger
+	cache      *cache
+	blAddr     *blacklist.BlacklistAddr
+	blName     *blacklist.BlacklistName
+	ipQ        chan net.IP
+	hostQ      chan *model.Host
+	active     atomic.Bool
+	iCnt, nCnt int
 }
 
-func New() (*Generator, error) {
+// New creates a new Generator.
+// iCnt is the number of goroutines to spawn for generating IP addresses
+// wCnt is the number of goroutines to spawn for resolving and checking hostnames.
+func New(icnt, ncnt int) (*Generator, error) {
 	var (
 		err error
-		gen = new(Generator)
+		gen = &Generator{
+			iCnt: icnt,
+			nCnt: ncnt,
+		}
 	)
 
 	if gen.log, err = common.GetLogger(logdomain.Generator); err != nil {
@@ -56,5 +107,170 @@ func New() (*Generator, error) {
 		return nil, err
 	}
 
+	gen.blAddr = blacklist.NewBlacklistAddr()
+	gen.blName = blacklist.NewBlacklistName()
+	gen.ipQ = make(chan net.IP, icnt)
+	gen.hostQ = make(chan *model.Host, ncnt)
+
 	return gen, nil
 } // func New() (*Generator, error)
+
+func (gen *Generator) Start() {
+	gen.active.Store(true)
+
+	for i := range gen.iCnt {
+		go gen.addrWorker(i)
+	}
+
+	for i := range gen.nCnt {
+		go gen.nameWorker(i)
+	}
+
+	go gen.hostWorker()
+} // func (gen *Generator) Start()
+
+func (gen *Generator) addrWorker(id int) {
+	const maxErr = 5
+	for gen.active.Load() {
+		var (
+			err    error
+			addr   net.IP
+			errCnt int
+		)
+
+		if addr, err = gen.mkIP(); err != nil {
+			gen.log.Printf("[ERROR] addrWorker#%d failed to generate IP address: %s\n",
+				id,
+				err.Error())
+			errCnt++
+			if errCnt >= maxErr {
+				gen.log.Printf("[ERROR] addrWorker#%d failed %d times, I'll bail!",
+					id,
+					errCnt)
+				return
+			}
+		}
+
+		gen.ipQ <- addr
+	}
+} // func (gen *Generator) addrWorker(id int)
+
+func (gen *Generator) mkIP() (net.IP, error) {
+	const maxErr = 5
+	var (
+		err               error
+		octets            [4]byte
+		bytesRead, errCnt int
+	)
+
+	for {
+		if bytesRead, err = rand.Read(octets[:]); err != nil {
+			gen.log.Printf("[ERROR] Failed to read random bytes: %s\n",
+				err.Error())
+			return nil, err
+		} else if bytesRead != 4 {
+			continue
+		}
+
+		var (
+			known bool
+			addr  = net.IPv4(octets[0], octets[1], octets[2], octets[3])
+		)
+
+		if known, err = gen.cache.check(addr); err != nil {
+			gen.log.Printf("[ERROR] Failed to look up IP %s in cache: %s\n",
+				addr,
+				err.Error())
+			errCnt++
+			if errCnt >= maxErr {
+				return nil, err
+			}
+		} else if known || gen.blAddr.Match(addr) {
+			continue
+		}
+
+		return addr, nil
+	}
+} // func (gen *Generator) mkIP() (net.IP, error)
+
+func (gen *Generator) nameWorker(id int) {
+	var (
+		err  error
+		addr net.IP
+		host *model.Host
+	)
+
+	for gen.active.Load() {
+		addr = <-gen.ipQ
+
+		if host, err = gen.processAddr(addr); err != nil {
+			gen.log.Printf("[ERROR] nameWorker#%d failed to process IP address %s: %s\n",
+				id,
+				addr,
+				err.Error())
+			continue
+		} else if host != nil {
+			gen.hostQ <- host
+		}
+	}
+} // func (gen *Generator) nameWorker(id int)
+
+func (gen *Generator) processAddr(addr net.IP) (*model.Host, error) {
+	var (
+		err   error
+		names []string
+	)
+
+	if names, err = net.LookupAddr(addr.String()); err != nil {
+		gen.log.Printf("[ERROR] Failed to resolve address %s to name: %s\n",
+			addr,
+			err.Error())
+		return nil, err
+	} else if len(names) == 0 {
+		return nil, nil
+	} else if gen.blName.Match(names[0]) {
+		return nil, nil
+	}
+
+	var host = &model.Host{
+		Addr:   addr,
+		Name:   names[0],
+		Added:  time.Now(),
+		Source: hsrc.Generator,
+	}
+
+	return host, nil
+} // func (gen *Generator) processAddr(addr net.IP) (*model.Host, error)
+
+func (gen *Generator) hostWorker() {
+	var (
+		err    error
+		db     *database.Database
+		host   *model.Host
+		ticker *time.Ticker
+	)
+
+	if db, err = database.Open(common.DbPath); err != nil {
+		gen.log.Printf("[ERROR] hostWorker failed to open database: %s\n",
+			err.Error())
+		panic(err)
+	}
+
+	ticker = time.NewTicker(common.ActiveTimeout)
+	defer ticker.Stop()
+
+	for gen.active.Load() {
+		select {
+		case <-ticker.C:
+			continue
+		case host = <-gen.hostQ:
+			if host == nil {
+				gen.log.Println("[CANTHAPPEN] Received nil Host from hostQ!")
+				continue
+			} else if err = db.HostAdd(host); err != nil {
+				gen.log.Printf("[ERROR] Failed to add Host to Database: %s\n",
+					err.Error())
+			}
+		}
+	}
+} // func (gen *Generator) hostWorker()
