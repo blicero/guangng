@@ -2,17 +2,20 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 18:40:42 krylon>
+// Time-stamp: <2026-01-15 20:57:06 krylon>
 
 // Package model provides the data types our application deals with.
 package model
 
 import (
 	"net"
+	"regexp"
 	"time"
 
 	"github.com/blicero/guangng/model/hsrc"
 )
+
+var zonePat = regexp.MustCompile("^[^.]+[.](.*)$")
 
 // Host is a host on the wide, wide Internet.
 type Host struct {
@@ -36,6 +39,16 @@ func (h *Host) AStr() string {
 	return h.astr
 } // func (h *Host) AStr() string
 
+func (h *Host) Zone() string {
+	var match = zonePat.FindStringSubmatch(h.Name)
+
+	if match == nil {
+		return "" // CANTHAPPEN!
+	}
+
+	return match[1]
+} // func (h *Host) Zone() string
+
 // Zone is a DNS zone that we may attempt to perform a zone transfer on.
 type Zone struct {
 	ID       int64
@@ -43,7 +56,7 @@ type Zone struct {
 	Added    time.Time
 	Started  time.Time
 	Finished time.Time
-	Status   string
+	Status   bool
 }
 
 // Service represents a scanned port (success or not).

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 18:53:11 krylon>
+// Time-stamp: <2026-01-15 21:20:18 krylon>
 
 package generator
 
@@ -311,3 +311,31 @@ func (gen *Generator) hostWorker() {
 		}
 	}
 } // func (gen *Generator) hostWorker()
+
+func (gen *Generator) checkXFR(host *model.Host, db *database.Database) {
+	var (
+		err error
+		xfr *model.Zone
+		dns = host.Zone()
+	)
+
+	if xfr, err = db.XFRGetByName(dns); err != nil {
+		gen.log.Printf("[ERROR] Failed to look up XFR of zone %s: %s\n",
+			dns,
+			err.Error())
+		return
+	} else if xfr != nil {
+		return
+	}
+
+	xfr = &model.Zone{
+		Name:  dns,
+		Added: time.Now(),
+	}
+
+	if err = db.XFRAdd(xfr); err != nil {
+		gen.log.Printf("[ERROR] Failed to add DNS zone %s to database: %s\n",
+			dns,
+			err.Error())
+	}
+} // func (gen *Generator) checkXFR(host *model.Host)
