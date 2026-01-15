@@ -85,6 +85,8 @@ type Generator struct {
 	hostQ      chan *model.Host
 	active     atomic.Bool
 	iCnt, nCnt int
+	ctlQAddr   chan bool
+	ctlQName   chan bool
 }
 
 // New creates a new Generator.
@@ -111,10 +113,13 @@ func New(icnt, ncnt int) (*Generator, error) {
 	gen.blName = blacklist.NewBlacklistName()
 	gen.ipQ = make(chan net.IP, icnt)
 	gen.hostQ = make(chan *model.Host, ncnt)
+	gen.ctlQAddr = make(chan bool, icnt)
+	gen.ctlQName = make(chan bool, ncnt)
 
 	return gen, nil
 } // func New() (*Generator, error)
 
+// Start sets the Generator's active flag and spawns the worker goroutines.
 func (gen *Generator) Start() {
 	gen.active.Store(true)
 
@@ -129,8 +134,20 @@ func (gen *Generator) Start() {
 	go gen.hostWorker()
 } // func (gen *Generator) Start()
 
+// Stop clears the Generator's active flag.
+func (gen *Generator) Stop() {
+	gen.active.Store(false)
+} // func (gen *Generator) Stop()
+
 func (gen *Generator) addrWorker(id int) {
 	const maxErr = 5
+
+	gen.log.Printf("[DEBUG] addrWorker#%d starting up...\n", id)
+	defer gen.log.Printf("[DEBUG] addrWorker#%d is quitting.", id)
+
+	var ticker = time.NewTicker(common.ActiveTimeout)
+	defer ticker.Stop()
+
 	for gen.active.Load() {
 		var (
 			err    error
@@ -151,7 +168,17 @@ func (gen *Generator) addrWorker(id int) {
 			}
 		}
 
-		gen.ipQ <- addr
+	SEND_ADDR:
+		select {
+		case gen.ipQ <- addr:
+			continue
+		case <-gen.ctlQAddr:
+			return
+		case <-ticker.C:
+			if gen.active.Load() {
+				goto SEND_ADDR
+			}
+		}
 	}
 } // func (gen *Generator) addrWorker(id int)
 
@@ -195,22 +222,31 @@ func (gen *Generator) mkIP() (net.IP, error) {
 
 func (gen *Generator) nameWorker(id int) {
 	var (
-		err  error
-		addr net.IP
-		host *model.Host
+		err    error
+		addr   net.IP
+		host   *model.Host
+		ticker *time.Ticker
 	)
 
-	for gen.active.Load() {
-		addr = <-gen.ipQ
+	ticker = time.NewTicker(common.ActiveTimeout)
+	defer ticker.Stop()
 
-		if host, err = gen.processAddr(addr); err != nil {
-			gen.log.Printf("[ERROR] nameWorker#%d failed to process IP address %s: %s\n",
-				id,
-				addr,
-				err.Error())
+	for gen.active.Load() {
+		select {
+		case <-ticker.C:
 			continue
-		} else if host != nil {
-			gen.hostQ <- host
+		case <-gen.ctlQName:
+			return
+		case addr = <-gen.ipQ:
+			if host, err = gen.processAddr(addr); err != nil {
+				gen.log.Printf("[ERROR] nameWorker#%d failed to process IP address %s: %s\n",
+					id,
+					addr,
+					err.Error())
+				continue
+			} else if host != nil {
+				gen.hostQ <- host
+			}
 		}
 	}
 } // func (gen *Generator) nameWorker(id int)
@@ -264,6 +300,7 @@ func (gen *Generator) hostWorker() {
 		case <-ticker.C:
 			continue
 		case host = <-gen.hostQ:
+			// TODO XFR!
 			if host == nil {
 				gen.log.Println("[CANTHAPPEN] Received nil Host from hostQ!")
 				continue
