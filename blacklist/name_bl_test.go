@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 15:17:50 krylon>
+// Time-stamp: <2026-01-15 18:53:47 krylon>
 
 package blacklist
 
@@ -18,7 +18,7 @@ func TestCreateNameBlacklist(t *testing.T) {
 		}
 	}()
 
-	nbl = NewNameBlacklist()
+	nbl = NewBlacklistName()
 
 	if nbl == nil {
 		t.Fatalf("NewNameBlacklist returned nil!")

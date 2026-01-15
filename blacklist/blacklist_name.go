@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 15:00:45 krylon>
+// Time-stamp: <2026-01-15 18:34:10 krylon>
 
 package blacklist
 
@@ -51,7 +51,7 @@ type BlacklistName struct {
 	lock  sync.Mutex
 }
 
-func NewNameBlacklist() *BlacklistName {
+func NewBlacklistName() *BlacklistName {
 	var list = &BlacklistName{
 		items: make(NameItemList, len(defaultNamePatterns)),
 	}
