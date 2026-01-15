@@ -2,50 +2,17 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 15:32:34 krylon>
+// Time-stamp: <2026-01-15 18:40:42 krylon>
 
 // Package model provides the data types our application deals with.
 package model
 
 import (
-	"fmt"
 	"net"
 	"time"
+
+	"github.com/blicero/guangng/model/hsrc"
 )
-
-// HostSource signifies how a Host found its way into the database.
-type HostSource uint8
-
-const (
-	Generator HostSource = iota + 1
-	XFR
-	MX
-	NS
-	User
-)
-
-// For once, I am not using stringer, that list won't change.
-//
-// But I am leaving this here: Add an X for each time that decision
-// has bit me in the behind:
-//
-
-func (s HostSource) String() string {
-	switch s {
-	case Generator:
-		return "Generator"
-	case XFR:
-		return "XFR"
-	case MX:
-		return "MX"
-	case NS:
-		return "NS"
-	case User:
-		return "User"
-	default:
-		panic(fmt.Sprintf("Invalid HostSource value %d", s))
-	}
-} // func (s HostSource) String() string
 
 // Host is a host on the wide, wide Internet.
 type Host struct {
@@ -56,7 +23,7 @@ type Host struct {
 	LastContact time.Time
 	Sysname     string
 	Location    string
-	Source      HostSource
+	Source      hsrc.HostSource
 	astr        string
 }
 
