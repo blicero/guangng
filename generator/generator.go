@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 21:20:18 krylon>
+// Time-stamp: <2026-01-16 16:57:48 krylon>
 
 package generator
 
@@ -307,6 +307,8 @@ func (gen *Generator) hostWorker() {
 			} else if err = db.HostAdd(host); err != nil {
 				gen.log.Printf("[ERROR] Failed to add Host to Database: %s\n",
 					err.Error())
+			} else {
+				gen.checkXFR(host, db)
 			}
 		}
 	}
