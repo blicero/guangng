@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 18:41:21 krylon>
+// Time-stamp: <2026-01-19 19:36:18 krylon>
 
 //go:build ignore
 // +build ignore
@@ -61,6 +61,7 @@ var candidates = map[string][]string{
 		"logdomain",
 		"database/query",
 		"model/hsrc",
+		"model/subsystem",
 	},
 	"test": {
 		"blacklist",
@@ -71,6 +72,7 @@ var candidates = map[string][]string{
 		"common",
 		"model",
 		"model/hsrc",
+		"model/subsystem",
 		"blacklist",
 		"database",
 		"database/query",
@@ -80,6 +82,7 @@ var candidates = map[string][]string{
 		"common",
 		"model",
 		"model/hsrc",
+		"model/subsystem",
 		"blacklist",
 		"database",
 		"database/query",
