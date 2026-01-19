@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 22:38:45 krylon>
+// Time-stamp: <2026-01-19 18:53:48 krylon>
 
 package logdomain
 
@@ -21,6 +21,7 @@ const (
 	Blacklist
 	XFR
 	Scanner
+	Nexus
 )
 
 // AllDomains returns a slice of all valid values for logdomain.ID
@@ -35,5 +36,6 @@ func AllDomains() []ID {
 		Blacklist,
 		XFR,
 		Scanner,
+		Nexus,
 	}
 } // func AllDomains() []ID
