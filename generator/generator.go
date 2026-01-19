@@ -319,6 +319,8 @@ func (gen *Generator) hostWorker() {
 	}
 } // func (gen *Generator) hostWorker()
 
+var tldPat = regexp.MustCompile("^[^.]+[.]?$")
+
 func (gen *Generator) checkXFR(host *model.Host, db *database.Database) {
 	var (
 		err error
@@ -326,7 +328,11 @@ func (gen *Generator) checkXFR(host *model.Host, db *database.Database) {
 		dns = host.Zone()
 	)
 
-	if xfr, err = db.XFRGetByName(dns); err != nil {
+	if tldPat.MatchString(dns) {
+		gen.log.Printf("[DEBUG] Zone %s looks like a top-level domain, so we skip it.\n",
+			dns)
+		return
+	} else if xfr, err = db.XFRGetByName(dns); err != nil {
 		gen.log.Printf("[ERROR] Failed to look up XFR of zone %s: %s\n",
 			dns,
 			err.Error())
