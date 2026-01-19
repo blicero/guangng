@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 21:13:38 krylon>
+// Time-stamp: <2026-01-19 19:53:24 krylon>
 
 package database
 
@@ -52,7 +52,7 @@ EXEC_QUERY:
 
 		if !rows.Next() {
 			// CANTHAPPEN
-			db.log.Printf("[ERROR] Query %s did not return a value\n",
+			db.log.Printf("[CANTHAPPEN] Query %s did not return a value\n",
 				qid)
 			return fmt.Errorf("query %s did not return a value", qid)
 		} else if err = rows.Scan(&id); err != nil {
