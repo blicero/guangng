@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-16 16:57:48 krylon>
+// Time-stamp: <2026-01-19 19:11:57 krylon>
 
 package generator
 
@@ -138,6 +138,11 @@ func (gen *Generator) Start() {
 func (gen *Generator) Stop() {
 	gen.active.Store(false)
 } // func (gen *Generator) Stop()
+
+// IsActive returns the Generator's active flag.
+func (gen *Generator) IsActive() bool {
+	return gen.active.Load()
+} // func (gen *Generator) IsActive() bool
 
 func (gen *Generator) addrWorker(id int) {
 	const maxErr = 5
