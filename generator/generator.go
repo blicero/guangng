@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 19:11:57 krylon>
+// Time-stamp: <2026-01-19 20:29:53 krylon>
 
 package generator
 
@@ -10,6 +10,8 @@ import (
 	"crypto/rand"
 	"log"
 	"net"
+	"regexp"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -244,10 +246,12 @@ func (gen *Generator) nameWorker(id int) {
 			return
 		case addr = <-gen.ipQ:
 			if host, err = gen.processAddr(addr); err != nil {
-				gen.log.Printf("[ERROR] nameWorker#%d failed to process IP address %s: %s\n",
-					id,
-					addr,
-					err.Error())
+				if !ignoreErr(err) {
+					gen.log.Printf("[ERROR] nameWorker#%d failed to process IP address %s: %s\n",
+						id,
+						addr,
+						err.Error())
+				}
 				continue
 			} else if host != nil {
 				gen.hostQ <- host
@@ -256,16 +260,50 @@ func (gen *Generator) nameWorker(id int) {
 	}
 } // func (gen *Generator) nameWorker(id int)
 
-func (gen *Generator) processAddr(addr net.IP) (*model.Host, error) {
+func ignoreErr(err error) bool {
 	var (
-		err   error
-		names []string
+		res bool
+		msg = err.Error()
 	)
 
+	if strings.HasSuffix(msg, "no such host") {
+		res = true
+	} else if strings.HasSuffix(msg, "Temporary failure in name resolution") {
+		res = true
+	}
+
+	return res
+} // func ignoreErr(err error) bool
+
+func isTransient(err error) bool {
+	return strings.HasSuffix(err.Error(), "Temporary failure in name resolution")
+} // func isTransient(err error) bool
+
+func (gen *Generator) processAddr(addr net.IP) (*model.Host, error) {
+	const (
+		maxErr     = 5
+		retryDelay = time.Millisecond * 250
+	)
+	var (
+		err    error
+		errCnt int
+		names  []string
+	)
+
+RESOLVE:
 	if names, err = net.LookupAddr(addr.String()); err != nil {
-		gen.log.Printf("[ERROR] Failed to resolve address %s to name: %s\n",
-			addr,
-			err.Error())
+		if isTransient(err) {
+			if errCnt < maxErr {
+				errCnt++
+				time.Sleep(retryDelay)
+				goto RESOLVE
+			}
+		}
+		if !ignoreErr(err) {
+			gen.log.Printf("[ERROR] Failed to resolve address %s to name: %s\n",
+				addr,
+				err.Error())
+		}
 		return nil, err
 	} else if len(names) == 0 {
 		return nil, nil
@@ -305,7 +343,6 @@ func (gen *Generator) hostWorker() {
 		case <-ticker.C:
 			continue
 		case host = <-gen.hostQ:
-			// TODO XFR!
 			if host == nil {
 				gen.log.Println("[CANTHAPPEN] Received nil Host from hostQ!")
 				continue
