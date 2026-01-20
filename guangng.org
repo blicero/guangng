@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-01-20 13:33:40 krylon>
+# Time-stamp: <2026-01-20 15:05:13 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -15,20 +15,21 @@
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-01-20 Di 13:33]
+   #+CAPTION: Clock summary at [2026-01-20 Di 15:05]
    | Headline                                  | Time    |         |      |      |
    |-------------------------------------------+---------+---------+------+------|
-   | *Total time*                              | *16:18* |         |      |      |
+   | *Total time*                              | *17:46* |         |      |      |
    |-------------------------------------------+---------+---------+------+------|
-   | *GuangNG [0/0]*                           | *16:18* |         |      |      |
-   | \_  /Components [0/0]/                    |         | /16:05/ |      |      |
+   | *GuangNG [0/0]*                           | *17:46* |         |      |      |
+   | \_  /Components [0/0]/                    |         | /17:33/ |      |      |
    | \_    Main [0/0]                          |         |         | 0:15 |      |
    | \_    Model [0/0]                         |         |         | 1:37 |      |
-   | \_    Database [0/0]                      |         |         | 2:09 |      |
+   | \_    Database [0/0]                      |         |         | 2:19 |      |
    | \_    Blacklist [0/0]                     |         |         | 1:08 |      |
    | \_      Testing                           |         |         |      | 0:12 |
    | \_    Generator [2/2]                     |         |         | 9:28 |      |
    | \_      Sanity-check zones for XFR        |         |         |      | 0:47 |
+   | \_    XFR [0/0]                           |         |         | 1:18 |      |
    | \_    Nexus [0/0]                         |         |         | 1:28 |      |
    | \_  /Bugs [1/1]/                          |         | /0:13/  |      |      |
    | \_    Query XFRAdd did not return a value |         |         | 0:13 |      |
@@ -58,6 +59,7 @@
     :VISIBILITY:
     :END:
     :LOGBOOK:
+    CLOCK: [2026-01-20 Di 14:02]--[2026-01-20 Di 14:12] =>  0:10
     CLOCK: [2026-01-15 Do 21:10]--[2026-01-15 Do 21:15] =>  0:05
     CLOCK: [2026-01-15 Do 20:18]--[2026-01-15 Do 20:57] =>  0:39
     CLOCK: [2026-01-12 Mo 16:21]--[2026-01-12 Mo 16:58] =>  0:37
@@ -104,6 +106,11 @@
     :COOKIE_DATA: todo recursive
     :VISIBILITY:
     :END:
+    :LOGBOOK:
+    CLOCK: [2026-01-20 Di 14:13]--[2026-01-20 Di 15:05] =>  0:52
+    CLOCK: [2026-01-20 Di 13:36]--[2026-01-20 Di 14:02] =>  0:26
+    :END:
+    Alright, let's see how this one goes.
 *** Scanner [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
