@@ -123,3 +123,60 @@ EXEC_QUERY:
 
 	return nil, nil
 } // func (db *Database) XFRGetByName(name string) (*model.Zone, error)
+
+// XFRGetUnfinished returns up <lim> unfinished XFRs from the database,
+// ordered by age (so the oldest ones will be returned first).
+func (db *Database) XFRGetUnfinished(lim int) ([]*model.Zone, error) {
+	const qid query.ID = query.XFRGetUnfinished
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(lim); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var xlist = make([]*model.Zone, 0, lim)
+
+	for rows.Next() {
+		var (
+			added, start int64
+			zone         = new(model.Zone)
+		)
+
+		if err = rows.Scan(&zone.ID, &zone.Name, &added, &start); err != nil {
+			db.log.Printf("[ERROR] Failed to scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		zone.Added = time.Unix(added, 0)
+		if start != -1 {
+			zone.Started = time.Unix(start, 0)
+		}
+
+		xlist = append(xlist, zone)
+	}
+
+	return xlist, nil
+} // func (db *Database) XFRGetUnfinished(lim int) ([]*model.Zone, error)

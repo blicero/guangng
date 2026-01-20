@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 21:12:42 krylon>
+// Time-stamp: <2026-01-20 14:04:18 krylon>
 
 package database
 
@@ -88,5 +88,16 @@ SELECT
     status
 FROM xfr
 WHERE name = ?
+`,
+	query.XFRGetUnfinished: `
+SELECT
+    id,
+    name,
+    added,
+    COALESCE(start, -1)
+FROM xfr
+WHERE end IS NULL
+ORDER BY added
+LIMIT ?
 `,
 }
