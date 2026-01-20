@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 20:19:33 krylon>
+// Time-stamp: <2026-01-20 14:11:48 krylon>
 
 package database
 
@@ -134,6 +134,7 @@ EXEC_QUERY:
 	return nil, nil
 } // func (db *Database) HostGetByID(id int64) (*model.Host, error)
 
+// HostGetRandom returns up to <max> Hosts randomly picked from the database.
 func (db *Database) HostGetRandom(max int) ([]model.Host, error) {
 	const qid query.ID = query.HostGetRandom
 	var err error
@@ -192,12 +193,12 @@ EXEC_QUERY:
 			msg = fmt.Sprintf("Error scanning row: %s", err.Error())
 			db.log.Printf("[ERROR] %s\n", msg)
 			return nil, errors.New(msg)
-		} else {
-			host.Addr = net.ParseIP(addrStr)
-			host.Added = time.Unix(added, 0)
-			host.LastContact = time.Unix(contact, 0)
-			hosts = append(hosts, host)
 		}
+
+		host.Addr = net.ParseIP(addrStr)
+		host.Added = time.Unix(added, 0)
+		host.LastContact = time.Unix(contact, 0)
+		hosts = append(hosts, host)
 	}
 
 	return hosts, nil

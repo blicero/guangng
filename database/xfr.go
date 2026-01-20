@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 19:53:24 krylon>
+// Time-stamp: <2026-01-20 14:12:37 krylon>
 
 package database
 
@@ -15,6 +15,7 @@ import (
 	"github.com/blicero/guangng/model"
 )
 
+// XFRAdd adds a zone to the database.
 func (db *Database) XFRAdd(zone *model.Zone) error {
 	const qid query.ID = query.XFRAdd
 	var (
@@ -68,6 +69,7 @@ EXEC_QUERY:
 	}
 } // func (db *Database) XFRAdd(zone *model.Zone) error
 
+// XFRGetByName looks up a zone by its name.
 func (db *Database) XFRGetByName(name string) (*model.Zone, error) {
 	const qid query.ID = query.XFRGetByName
 	var (
