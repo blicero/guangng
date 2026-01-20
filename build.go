@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 19:36:18 krylon>
+// Time-stamp: <2026-01-20 13:33:01 krylon>
 
 //go:build ignore
 // +build ignore
@@ -66,6 +66,7 @@ var candidates = map[string][]string{
 	"test": {
 		"blacklist",
 		"database",
+		"model",
 	},
 	"vet": {
 		"logdomain",

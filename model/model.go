@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 20:57:06 krylon>
+// Time-stamp: <2026-01-20 13:28:59 krylon>
 
 // Package model provides the data types our application deals with.
 package model
@@ -15,7 +15,7 @@ import (
 	"github.com/blicero/guangng/model/hsrc"
 )
 
-var zonePat = regexp.MustCompile("^[^.]+[.](.*)$")
+var zonePat = regexp.MustCompile("^[^.]+[.](.*?)[.]?$")
 
 // Host is a host on the wide, wide Internet.
 type Host struct {
