@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-20 14:12:37 krylon>
+// Time-stamp: <2026-01-21 15:53:59 krylon>
 
 package database
 
@@ -182,3 +182,75 @@ EXEC_QUERY:
 
 	return xlist, nil
 } // func (db *Database) XFRGetUnfinished(lim int) ([]*model.Zone, error)
+
+// XFRStart registers the beginning of an attempt to do a transfer of a DNS zone.
+func (db *Database) XFRStart(zone *model.Zone) error {
+	const qid query.ID = query.XFRStart
+	var (
+		err  error
+		stmt *sql.Stmt
+		now  = time.Now()
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Failed to prepare query %s: %s\n",
+			qid,
+			err.Error())
+		panic(err)
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(now.Unix(), zone.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot add zone %s to database: %w",
+				zone.Name,
+				err)
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	zone.Started = now
+	return nil
+} // func (db *Database) XFRStart(z *model.Zone) error
+
+// XFRFinish registers the completion (successful or not) of an attempted AXFR.
+func (db *Database) XFRFinish(zone *model.Zone) error {
+	const qid query.ID = query.XFRFinish
+	var (
+		err  error
+		stmt *sql.Stmt
+		now  = time.Now()
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Failed to prepare query %s: %s\n",
+			qid,
+			err.Error())
+		panic(err)
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(now.Unix(), zone.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot add zone %s to database: %w",
+				zone.Name,
+				err)
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	zone.Finished = now
+	return nil
+} // func (db *Database) XFRFinish(zone *model.Zone) error
