@@ -2,21 +2,29 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-20 14:35:57 krylon>
+// Time-stamp: <2026-01-21 15:43:17 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
 package xfr
 
 import (
+	"fmt"
 	"log"
+	"net"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"time"
 
+	"github.com/blicero/guangng/blacklist"
 	"github.com/blicero/guangng/common"
 	"github.com/blicero/guangng/database"
 	"github.com/blicero/guangng/logdomain"
 	"github.com/blicero/guangng/model"
+	"github.com/blicero/guangng/model/hsrc"
+	dns "github.com/tonnerre/golang-dns"
 )
 
 // XFR attempts to perform zone transfers.
@@ -27,6 +35,10 @@ type XFR struct {
 	cmdQ   chan bool
 	xfrQ   chan *model.Zone
 	hostQ  chan *model.Host
+	res    *dns.Client
+	pool   *database.Pool
+	blName *blacklist.BlacklistName
+	blAddr *blacklist.BlacklistAddr
 }
 
 // New returns a new XFR instance.
@@ -38,11 +50,20 @@ func New(cnt int) (*XFR, error) {
 
 	if x.log, err = common.GetLogger(logdomain.XFR); err != nil {
 		return nil, err
+	} else if x.pool, err = database.NewPool(4); err != nil {
+		x.log.Printf("[ERROR] Failed to create DB pool: %s\n",
+			err.Error())
+		return nil, err
 	}
 
 	x.cmdQ = make(chan bool, cnt)
 	x.xfrQ = make(chan *model.Zone, cnt)
 	x.hostQ = make(chan *model.Host, cnt)
+	x.res = new(dns.Client)
+	x.blAddr = blacklist.NewBlacklistAddr()
+	x.blName = blacklist.NewBlacklistName()
+
+	x.res.Net = "tcp"
 
 	return x, nil
 } // func New(cnt int) (*XFR, error)
@@ -75,14 +96,16 @@ func (x *XFR) hostWorker() {
 		ticker *time.Ticker
 	)
 
-	if db, err = database.Open(common.DbPath); err != nil {
-		x.log.Printf("[CRITICAL] Cannot open database: %s\n",
-			err.Error())
-		x.active.Store(false)
-		return
-	}
+	// if db, err = database.Open(common.DbPath); err != nil {
+	// 	x.log.Printf("[CRITICAL] Cannot open database: %s\n",
+	// 		err.Error())
+	// 	x.active.Store(false)
+	// 	return
+	// }
 
-	defer db.Close() // nolint: errcheck
+	// defer db.Close() // nolint: errcheck
+	db = x.pool.Get()
+	defer x.pool.Put(db)
 
 	ticker = time.NewTicker(common.ActiveTimeout)
 	defer ticker.Stop()
@@ -112,12 +135,14 @@ func (x *XFR) xfrFeeder() {
 		ticker *time.Ticker
 	)
 
-	if db, err = database.Open(common.DbPath); err != nil {
-		x.log.Printf("[CRITICAL] Failed to open database: %s\n",
-			err.Error())
-		x.active.Store(false)
-		return
-	}
+	// if db, err = database.Open(common.DbPath); err != nil {
+	// 	x.log.Printf("[CRITICAL] Failed to open database: %s\n",
+	// 		err.Error())
+	// 	x.active.Store(false)
+	// 	return
+	// }
+	db = x.pool.Get()
+	defer x.pool.Put(db)
 
 	ticker = time.NewTicker(common.ActiveTimeout)
 	defer ticker.Stop()
@@ -161,15 +186,8 @@ func (x *XFR) xfrWorker(id int) {
 	var (
 		err    error
 		cnt    int64
-		db     *database.Database
 		ticker *time.Ticker
 	)
-
-	if db, err = database.Open(common.DbPath); err != nil {
-		x.log.Printf("[CRITICAL] xfrWorker#%02d: Failed to open database: %s\n",
-			id,
-			err.Error())
-	}
 
 	ticker = time.NewTicker(common.ActiveTimeout)
 	defer ticker.Stop()
@@ -186,6 +204,10 @@ func (x *XFR) xfrWorker(id int) {
 				x.log.Printf("[ERROR] AXFR of %s failed: %s\n",
 					z.Name,
 					err.Error())
+			} else {
+				x.log.Printf("[DEBUG] AXFR of %s completed, %d RRs were processed.\n",
+					z.Name,
+					cnt)
 			}
 		}
 	}
@@ -195,5 +217,186 @@ func (x *XFR) doXFR(z *model.Zone) (int64, error) {
 	x.log.Printf("[DEBUG] Attempt AXFR of %s...\n",
 		z.Name)
 
-	return 0, nil
+	var (
+		err    error
+		db     *database.Database
+		msg    string
+		cnt    int64
+		status bool
+		soa    []*net.NS
+	)
+
+	db = x.pool.Get()
+	defer x.pool.Put(db)
+
+	if soa, err = net.LookupNS(z.Name); err != nil {
+		x.log.Printf("[ERROR] failed to find nameservers for %s: %s\n",
+			z.Name,
+			err.Error())
+		return 0, err
+	} else if len(soa) == 0 {
+		x.log.Printf("[TRACE] No nameservers were found for %s.\n",
+			z.Name)
+		return 0, nil
+	} else if common.Debug {
+		var servers = make([]string, len(soa))
+		for i, s := range soa {
+			servers[i] = s.Host
+		}
+
+		x.log.Printf("[TRACE] Found %d servers for %s: %s\n",
+			len(soa),
+			z.Name,
+			strings.Join(servers, ", "))
+	}
+
+SOA_LOOP:
+	for _, ns := range soa {
+		cnt, err = x.queryXFR(z, net.ParseIP(ns.Host))
+		if err == nil {
+			break SOA_LOOP
+		}
+	}
+
+	return cnt, nil
 } // func (x *XFR) doXFR(z *model.Zone) (int64, error)
+
+func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
+	var (
+		err     error
+		cnt     int64
+		xerr    bool
+		xfrMsg  dns.Msg
+		envQ    chan *dns.Envelope
+		dbgPath string
+		dbgFh   *os.File
+	)
+
+	// ...
+	xfrMsg.SetAxfr(z.Name)
+	x.log.Printf("[TRACE] Query %s for AXFR of %s\n",
+		srv,
+		z.Name)
+
+	dbgPath = filepath.Join(common.XfrDbgPath, z.Name)
+	if dbgFh, err = os.Create(dbgPath); err != nil {
+		var xerr = fmt.Errorf("failed to create spool file for AXFR of %s: %s",
+			z.Name,
+			err)
+		x.log.Printf("[ERROR] %s\n",
+			xerr.Error())
+		return 0, false, xerr
+	}
+
+	defer func() {
+		dbgFh.Close() // nolint: errcheck
+		if cnt == 0 {
+			os.Remove(dbgPath) // nolint: errcheck
+		}
+	}()
+
+	var ns = fmt.Sprintf("[%s]:53", srv)
+
+	if envQ, err = x.res.TransferIn(&xfrMsg, ns); err != nil {
+		var xerr = fmt.Errorf("failed to get AXFR of %s from %s: %w",
+			z.Name,
+			ns,
+			err,
+		)
+		x.log.Printf("[DEBUG] %s\n", xerr.Error())
+		return 0, false, xerr
+	}
+
+	for envelope := range envQ {
+		xerr = false
+		if envelope.Error != nil {
+			err = envelope.Error
+			xerr = true
+			x.log.Printf("[TRACE] Error during AXFR of %s: %s\n",
+				z.Name,
+				err.Error())
+			continue
+		}
+
+		var exists bool
+
+	RR_LOOP:
+		for _, rr := range envelope.RR {
+			var (
+				addrList []string
+				host     = new(model.Host)
+			)
+
+			fmt.Fprintln(dbgFh, rr.String())
+
+			cnt++
+
+			switch t := rr.(type) {
+			case *dns.A:
+				host.Addr = t.A
+				host.Name = rr.Header().Name
+				host.Source = hsrc.XFR
+				if x.blName.Match(host.Name) || x.blAddr.Match(host.Addr) {
+					continue RR_LOOP
+				}
+
+				x.hostQ <- host
+			case *dns.NS:
+				host.Name = rr.Header().Name
+				if x.blName.Match(host.Name) {
+					continue RR_LOOP
+				} else if addrList, err = net.LookupHost(host.Name); err != nil {
+					x.log.Printf("[TRACE] Failed to lookup NS %s: %s\n",
+						host.Name,
+						err.Error)
+					continue RR_LOOP
+				}
+
+			ADDR_LOOP:
+				for _, addr := range addrList {
+					var nsHost = &model.Host{
+						Name:   host.Name,
+						Addr:   net.ParseIP(addr),
+						Source: hsrc.NS,
+					}
+
+					if x.blAddr.Match(nsHost.Addr) {
+						continue ADDR_LOOP
+					}
+
+					x.hostQ <- nsHost
+				}
+			case *dns.MX:
+				host.Name = rr.Header().Name
+				if x.blName.Match(host.Name) {
+					continue RR_LOOP
+				} else if addrList, err = net.LookupHost(host.Name); err != nil {
+					continue RR_LOOP
+				}
+
+				for _, addr := range addrList {
+					var mxHost = &model.Host{
+						Name:   host.Name,
+						Addr:   net.ParseIP(addr),
+						Source: hsrc.MX,
+					}
+
+					if !x.blAddr.Match(mxHost.Addr) {
+						x.hostQ <- mxHost
+					}
+				}
+			case *dns.AAAA:
+				host.Name = rr.Header().Name
+				host.Addr = t.AAAA
+				host.Source = hsrc.XFR
+
+				if !(x.blAddr.Match(host.Addr) || x.blName.Match(host.Name)) {
+					x.hostQ <- host
+				}
+			}
+
+		}
+	}
+
+	return cnt, err
+} // func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error)
