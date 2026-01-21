@@ -11,6 +11,7 @@ require (
 require (
 	github.com/dgraph-io/badger v1.6.2
 	github.com/mattn/go-sqlite3 v1.14.33
+	github.com/tonnerre/golang-dns v0.0.0-20130925195549-c07f3c3cc475
 )
 
 require (
