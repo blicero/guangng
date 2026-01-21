@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-21 15:43:17 krylon>
+// Time-stamp: <2026-01-21 19:10:39 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -56,6 +56,7 @@ func New(cnt int) (*XFR, error) {
 		return nil, err
 	}
 
+	x.xcnt.Store(int32(cnt))
 	x.cmdQ = make(chan bool, cnt)
 	x.xfrQ = make(chan *model.Zone, cnt)
 	x.hostQ = make(chan *model.Host, cnt)
@@ -80,10 +81,16 @@ func (x *XFR) Start() {
 	x.active.Store(true)
 
 	go x.hostWorker()
+	go x.xfrFeeder()
+
+	for i := range x.xcnt.Load() {
+		go x.xfrWorker(int(i + 1))
+	}
 } // func (x *XFR) Start()
 
 // Stop clears the XFR engine's active flag (if set).
 func (x *XFR) Stop() {
+	x.active.Store(false)
 } // func (x *XFR) Stop()
 
 func (x *XFR) hostWorker() {
@@ -96,14 +103,6 @@ func (x *XFR) hostWorker() {
 		ticker *time.Ticker
 	)
 
-	// if db, err = database.Open(common.DbPath); err != nil {
-	// 	x.log.Printf("[CRITICAL] Cannot open database: %s\n",
-	// 		err.Error())
-	// 	x.active.Store(false)
-	// 	return
-	// }
-
-	// defer db.Close() // nolint: errcheck
 	db = x.pool.Get()
 	defer x.pool.Put(db)
 
@@ -135,12 +134,6 @@ func (x *XFR) xfrFeeder() {
 		ticker *time.Ticker
 	)
 
-	// if db, err = database.Open(common.DbPath); err != nil {
-	// 	x.log.Printf("[CRITICAL] Failed to open database: %s\n",
-	// 		err.Error())
-	// 	x.active.Store(false)
-	// 	return
-	// }
 	db = x.pool.Get()
 	defer x.pool.Put(db)
 
@@ -153,6 +146,8 @@ func (x *XFR) xfrFeeder() {
 			batchSize int = int(x.xcnt.Load())
 		)
 
+		x.log.Printf("[TRACE] Query for up to %d unfinished XFRs\n", batchSize)
+
 		if xlist, err = db.XFRGetUnfinished(batchSize); err != nil {
 			x.log.Printf("[ERROR] Failed to get %d unfinished XFRs: %s\n",
 				batchSize,
@@ -160,6 +155,7 @@ func (x *XFR) xfrFeeder() {
 			x.active.Store(false)
 			return
 		} else if len(xlist) == 0 {
+			x.log.Println("[DEBUG] No unfinished XFRs were found, maybe next time...")
 			time.Sleep(common.ActiveTimeout)
 			continue
 		}
@@ -169,10 +165,13 @@ func (x *XFR) xfrFeeder() {
 			select {
 			case <-ticker.C:
 				if !x.active.Load() {
+					x.log.Println("[TRACE] XFR engine has been stopped, I'm going home.")
 					return
 				}
 				goto SEND
 			case x.xfrQ <- z:
+				x.log.Printf("[TRACE] DNS zone %s has been submitted for AXFR\n",
+					z.Name)
 				continue
 			}
 		}
@@ -197,6 +196,8 @@ func (x *XFR) xfrWorker(id int) {
 		case <-ticker.C:
 			continue
 		case <-x.cmdQ:
+			x.log.Printf("[DEBUG] xfrWorker#%02d Somebody told me to stop? Fine by me, have a nice day!",
+				id)
 			return
 		case z := <-x.xfrQ:
 			x.log.Printf("[DEBUG] Attempt AXFR of %s...\n", z.Name)
@@ -220,7 +221,6 @@ func (x *XFR) doXFR(z *model.Zone) (int64, error) {
 	var (
 		err    error
 		db     *database.Database
-		msg    string
 		cnt    int64
 		status bool
 		soa    []*net.NS
@@ -228,6 +228,22 @@ func (x *XFR) doXFR(z *model.Zone) (int64, error) {
 
 	db = x.pool.Get()
 	defer x.pool.Put(db)
+
+	if err = db.XFRStart(z); err != nil {
+		x.log.Printf("[ERROR] Failed to register XFR of %s in database: %s\n",
+			z.Name,
+			err.Error())
+		return 0, err
+	}
+
+	defer func() {
+		var ex error
+		if ex = db.XFRFinish(z, status); ex != nil {
+			x.log.Printf("[ERROR] Failed to register XFR of %s as finished: %s\n",
+				z.Name,
+				ex.Error())
+		}
+	}()
 
 	if soa, err = net.LookupNS(z.Name); err != nil {
 		x.log.Printf("[ERROR] failed to find nameservers for %s: %s\n",
@@ -254,6 +270,7 @@ SOA_LOOP:
 	for _, ns := range soa {
 		cnt, err = x.queryXFR(z, net.ParseIP(ns.Host))
 		if err == nil {
+			status = true
 			break SOA_LOOP
 		}
 	}
@@ -265,7 +282,6 @@ func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
 	var (
 		err     error
 		cnt     int64
-		xerr    bool
 		xfrMsg  dns.Msg
 		envQ    chan *dns.Envelope
 		dbgPath string
@@ -285,7 +301,7 @@ func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
 			err)
 		x.log.Printf("[ERROR] %s\n",
 			xerr.Error())
-		return 0, false, xerr
+		return 0, xerr
 	}
 
 	defer func() {
@@ -304,21 +320,17 @@ func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
 			err,
 		)
 		x.log.Printf("[DEBUG] %s\n", xerr.Error())
-		return 0, false, xerr
+		return 0, xerr
 	}
 
 	for envelope := range envQ {
-		xerr = false
 		if envelope.Error != nil {
 			err = envelope.Error
-			xerr = true
 			x.log.Printf("[TRACE] Error during AXFR of %s: %s\n",
 				z.Name,
 				err.Error())
 			continue
 		}
-
-		var exists bool
 
 	RR_LOOP:
 		for _, rr := range envelope.RR {
@@ -348,7 +360,7 @@ func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
 				} else if addrList, err = net.LookupHost(host.Name); err != nil {
 					x.log.Printf("[TRACE] Failed to lookup NS %s: %s\n",
 						host.Name,
-						err.Error)
+						err.Error())
 					continue RR_LOOP
 				}
 
