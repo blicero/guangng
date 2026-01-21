@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 16. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 19:22:35 krylon>
+// Time-stamp: <2026-01-21 18:46:14 krylon>
 
 package nexus
 
@@ -14,6 +14,7 @@ import (
 	"github.com/blicero/guangng/common"
 	"github.com/blicero/guangng/generator"
 	"github.com/blicero/guangng/logdomain"
+	"github.com/blicero/guangng/xfr"
 )
 
 // Nexus coordinates the various subsystems.
@@ -22,10 +23,11 @@ type Nexus struct {
 	lock   sync.RWMutex
 	active atomic.Bool
 	gen    *generator.Generator
+	xfr    *xfr.XFR
 }
 
 // New returns a new Nexus.
-func New(gaCnt, gnCnt int) (*Nexus, error) {
+func New(gaCnt, gnCnt, xcnt int) (*Nexus, error) {
 	var (
 		err error
 		nx  = new(Nexus)
@@ -34,8 +36,13 @@ func New(gaCnt, gnCnt int) (*Nexus, error) {
 	if nx.log, err = common.GetLogger(logdomain.Nexus); err != nil {
 		return nil, err
 	} else if nx.gen, err = generator.New(gaCnt, gnCnt); err != nil {
-		nx.log.Printf("[ERROR] Failed to create Generator: %s\n",
+		nx.log.Printf("[CRITICAL] Failed to create Generator: %s\n",
 			err.Error())
+		return nil, err
+	} else if nx.xfr, err = xfr.New(xcnt); err != nil {
+		nx.log.Printf("[CRITICAL] Failed to create XFR Engine: %s\n",
+			err.Error())
+		return nil, err
 	}
 
 	return nx, nil
@@ -51,6 +58,7 @@ func (nx *Nexus) Start() {
 	nx.log.Println("[INFO] Starting subsystems...")
 	nx.active.Store(true)
 	nx.gen.Start()
+	nx.xfr.Start()
 } // func (nx *Nexus) Start()
 
 // Stop all running subsystems.
@@ -58,4 +66,5 @@ func (nx *Nexus) Stop() {
 	nx.log.Println("[INFO] Stopping subsystems...")
 	nx.active.Store(false)
 	nx.gen.Stop()
+	nx.xfr.Stop()
 } // func (nx *Nexus) Stop()
