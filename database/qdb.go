@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-21 15:47:28 krylon>
+// Time-stamp: <2026-01-21 18:22:25 krylon>
 
 package database
 
@@ -101,5 +101,5 @@ ORDER BY added
 LIMIT ?
 `,
 	query.XFRStart:  "UPDATE xfr SET start = ? WHERE id = ?",
-	query.XFRFinish: "UPDATE xfr SET end = ? WHERE id = ?",
+	query.XFRFinish: "UPDATE xfr SET end = ?, status = ? WHERE id = ?",
 }

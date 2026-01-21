@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 20:32:17 krylon>
+// Time-stamp: <2026-01-21 19:13:33 krylon>
 
 package database
 
@@ -54,8 +54,7 @@ CREATE TABLE xfr (
     start INTEGER,
     end INTEGER,
     status INTEGER NOT NULL DEFAULT 0,
-    CHECK ((end IS NULL) OR (start IS NOT NULL)),
-    CHECK ((end IS NULL) OR (end >= start))
+    CHECK ((end IS NULL) OR (start IS NOT NULL))
 ) STRICT
 `,
 	"CREATE INDEX xfr_start_idx ON xfr (start)",

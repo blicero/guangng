@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-21 15:53:59 krylon>
+// Time-stamp: <2026-01-21 18:59:20 krylon>
 
 package database
 
@@ -135,7 +135,11 @@ func (db *Database) XFRGetUnfinished(lim int) ([]*model.Zone, error) {
 		stmt *sql.Stmt
 	)
 
-	if stmt, err = db.getQuery(qid); err != nil {
+	if lim < 1 && lim != -1 {
+		err = fmt.Errorf("invalid batch size %d", lim)
+		db.log.Printf("[ERROR] %s\n", err.Error())
+		return nil, err
+	} else if stmt, err = db.getQuery(qid); err != nil {
 		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
 			qid,
 			err.Error())
@@ -220,7 +224,7 @@ EXEC_QUERY:
 } // func (db *Database) XFRStart(z *model.Zone) error
 
 // XFRFinish registers the completion (successful or not) of an attempted AXFR.
-func (db *Database) XFRFinish(zone *model.Zone) error {
+func (db *Database) XFRFinish(zone *model.Zone, status bool) error {
 	const qid query.ID = query.XFRFinish
 	var (
 		err  error
@@ -238,7 +242,7 @@ func (db *Database) XFRFinish(zone *model.Zone) error {
 	}
 
 EXEC_QUERY:
-	if _, err = stmt.Exec(now.Unix(), zone.ID); err != nil {
+	if _, err = stmt.Exec(now.Unix(), status, zone.ID); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
@@ -252,5 +256,6 @@ EXEC_QUERY:
 	}
 
 	zone.Finished = now
+	zone.Status = status
 	return nil
 } // func (db *Database) XFRFinish(zone *model.Zone) error
