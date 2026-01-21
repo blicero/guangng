@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 22:31:16 krylon>
+// Time-stamp: <2026-01-21 14:27:10 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -101,6 +101,8 @@ var CachePath = filepath.Join(BaseDir, "cache.d")
 
 var CfgPath = filepath.Join(BaseDir, fmt.Sprintf("%s.toml", strings.ToLower(AppName)))
 
+var XfrDbgPath = filepath.Join(BaseDir, "xfr.d")
+
 // InitApp performs some basic preparations for the application to run.
 // Currently, this means creating the BaseDir folder.
 func InitApp() error {
@@ -114,11 +116,16 @@ func InitApp() error {
 	DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
 	CachePath = filepath.Join(BaseDir, "cache.d")
 	CfgPath = filepath.Join(BaseDir, fmt.Sprintf("%s.toml", strings.ToLower(AppName)))
+	XfrDbgPath = filepath.Join(BaseDir, "xfr.d")
 
 	if err = os.Mkdir(CachePath, 0700); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("error creating cache directory %s: %s",
 			CachePath,
 			err.Error())
+	} else if err = os.Mkdir(XfrDbgPath, 0700); err != nil && !os.IsExist(err) {
+		return fmt.Errorf("cannot create XFR path %s: %w",
+			XfrDbgPath,
+			err)
 	}
 
 	return nil
