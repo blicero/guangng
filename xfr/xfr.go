@@ -2,13 +2,14 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-21 19:10:39 krylon>
+// Time-stamp: <2026-01-22 14:29:35 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
 package xfr
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -268,6 +269,9 @@ func (x *XFR) doXFR(z *model.Zone) (int64, error) {
 
 SOA_LOOP:
 	for _, ns := range soa {
+		if ns == nil {
+			continue
+		}
 		cnt, err = x.queryXFR(z, net.ParseIP(ns.Host))
 		if err == nil {
 			status = true
@@ -287,6 +291,10 @@ func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
 		dbgPath string
 		dbgFh   *os.File
 	)
+
+	if srv == nil {
+		return 0, errors.New("nameserver is nil")
+	}
 
 	// ...
 	xfrMsg.SetAxfr(z.Name)
