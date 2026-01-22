@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-22 14:29:35 krylon>
+// Time-stamp: <2026-01-22 15:50:10 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -144,7 +144,7 @@ func (x *XFR) xfrFeeder() {
 	for x.active.Load() {
 		var (
 			xlist     []*model.Zone
-			batchSize int = int(x.xcnt.Load())
+			batchSize = int(x.xcnt.Load())
 		)
 
 		x.log.Printf("[TRACE] Query for up to %d unfinished XFRs\n", batchSize)
@@ -347,7 +347,7 @@ func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
 				host     = new(model.Host)
 			)
 
-			fmt.Fprintln(dbgFh, rr.String())
+			fmt.Fprintln(dbgFh, rr.String()) // nolint: errcheck
 
 			cnt++
 
@@ -410,7 +410,7 @@ func (x *XFR) queryXFR(z *model.Zone, srv net.IP) (int64, error) {
 				host.Addr = t.AAAA
 				host.Source = hsrc.XFR
 
-				if !(x.blAddr.Match(host.Addr) || x.blName.Match(host.Name)) {
+				if !x.blAddr.Match(host.Addr) && !x.blName.Match(host.Name) {
 					x.hostQ <- host
 				}
 			}
