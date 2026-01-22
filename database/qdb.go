@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-21 18:22:25 krylon>
+// Time-stamp: <2026-01-22 18:48:09 krylon>
 
 package database
 
@@ -102,4 +102,9 @@ LIMIT ?
 `,
 	query.XFRStart:  "UPDATE xfr SET start = ? WHERE id = ?",
 	query.XFRFinish: "UPDATE xfr SET end = ?, status = ? WHERE id = ?",
+	query.ServiceAdd: `
+INSERT INTO svc (host_id, port, success, response, timestamp)
+         VALUES (      ?,    ?,       ?,        ?,         ?)
+RETURNING id
+`,
 }

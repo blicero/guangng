@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 20:16:36 krylon>
+// Time-stamp: <2026-01-22 16:55:48 krylon>
 
 package query
 
@@ -25,4 +25,8 @@ const (
 	XFRGetUnfinished
 	XFRStart
 	XFRFinish
+	ServiceAdd
+	ServiceGetByHost
+	ServiceGetByPort
+	ServiceGetSuccess
 )
