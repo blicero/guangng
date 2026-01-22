@@ -2,13 +2,15 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-22 16:02:57 krylon>
+// Time-stamp: <2026-01-22 16:50:04 krylon>
 
 // Package scanner implements scanning ports. Duh.
 package scanner
 
 import (
 	"log"
+	"math/rand"
+	"regexp"
 	"sync/atomic"
 	"time"
 
@@ -16,9 +18,79 @@ import (
 	"github.com/blicero/guangng/database"
 	"github.com/blicero/guangng/logdomain"
 	"github.com/blicero/guangng/model"
+	"github.com/blicero/guangng/model/hsrc"
 )
 
 const maxErr = 5
+
+var wwwPat *regexp.Regexp = regexp.MustCompile("(?i)^www")
+var ftpPat *regexp.Regexp = regexp.MustCompile("(?i)^ftp")
+var mxPat *regexp.Regexp = regexp.MustCompile("(?i)^(?:mx|mail|smtp|pop|imap)")
+var newline = regexp.MustCompile("[\r\n]+$")
+
+// Ports is the list of ports (TCP and UDP) we consider interesting.
+var Ports []uint16 = []uint16{
+	21,
+	22,
+	23,
+	25,
+	53,
+	79,
+	80,
+	110,
+	143,
+	161,
+	443,
+	631,
+	1024,
+	4444,
+	2525,
+	5353,
+	5800,
+	5900,
+	8000,
+	8080,
+	8081,
+}
+
+func getScanPort(host *model.Host, ports map[uint16]bool) uint16 {
+	if host.Source == hsrc.MX {
+		if !ports[25] {
+			return 25
+		} else if !ports[110] {
+			return 110
+		} else if !ports[143] {
+			return 143
+		}
+	} else if (host.Source == hsrc.NS) && !ports[53] {
+		return 53
+	} else if wwwPat.MatchString(host.Name) && !ports[80] {
+		// Samstag, 05. 07. 2014, 16:37
+		// Ich weiß noch nicht, wie einfach es ist, SSL zu reden, aber
+		// wenn das kein großer Krampf ist, kann ich hier natürlich
+		// auch auf Port 443 prüfen. Dito für die Mail-Protokolle!
+		return 80
+	} else if ftpPat.MatchString(host.Name) && !ports[21] {
+		return 21
+	} else if mxPat.MatchString(host.Name) {
+		if !ports[25] {
+			return 25
+		} else if !ports[110] {
+			return 110
+		} else if !ports[143] {
+			return 143
+		}
+	}
+
+	indexlist := rand.Perm(len(Ports))
+	for _, idx := range indexlist {
+		if !ports[Ports[idx]] {
+			return Ports[idx]
+		}
+	}
+
+	return 0
+} // func get_scan_port(host *Host, ports map[uint16]bool) uint16
 
 type scanResult struct {
 	host *model.Host
@@ -31,6 +103,7 @@ type Scanner struct {
 	goalCnt atomic.Int32
 	idCnt   int
 	active  atomic.Bool
+	pool    *database.Pool
 	hostQ   chan model.Host
 	resQ    chan scanResult
 	cmdQ    chan bool
@@ -43,6 +116,10 @@ func New(cnt int) (*Scanner, error) {
 	)
 
 	if scn.log, err = common.GetLogger(logdomain.Scanner); err != nil {
+		return nil, err
+	} else if scn.pool, err = database.NewPool(cnt); err != nil {
+		scn.log.Printf("[CRITICAL] Failed to open DB pool: %s\n",
+			err.Error())
 		return nil, err
 	}
 
@@ -205,3 +282,7 @@ func (scn *Scanner) scanWorker(id int) {
 		}
 	}
 } // func (scn *Scanner) scanWorker(id int)
+
+func (scn *Scanner) pickPort(host *model.Host) (uint16, error) {
+	var ()
+} // func (scn *Scanner) pickPort(host *model.Host) (uint16, error)
