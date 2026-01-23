@@ -2,66 +2,75 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-22 18:46:03 krylon>
+// Time-stamp: <2026-01-23 15:25:13 krylon>
 
 package database
 
-// func (db *Database) ServiceAdd(h *model.Host, s *model.Service) error {
-// 	const qid query.ID = query.ServiceAdd
-// 	var (
-// 		err  error
-// 		stmt *sql.Stmt
-// 	)
+import (
+	"database/sql"
+	"fmt"
+	"time"
 
-// 	if stmt, err = db.getQuery(qid); err != nil {
-// 		db.log.Printf("[ERROR] Failed to prepare query %s: %s\n",
-// 			qid,
-// 			err.Error())
-// 		panic(err)
-// 	} else if db.tx != nil {
-// 		stmt = db.tx.Stmt(stmt)
-// 	}
+	"github.com/blicero/guangng/database/query"
+	"github.com/blicero/guangng/model"
+)
 
-// 	var (
-// 		rows *sql.Rows
-// 		now  = time.Now()
-// 	)
+// ServiceAdd adds a scanned port and the result to the database.
+func (db *Database) ServiceAdd(h *model.Host, s *model.Service) error {
+	const qid query.ID = query.ServiceAdd
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
 
-// EXEC_QUERY:
-// 	if rows, err = stmt.Query(host.AStr(), host.Name, now.Unix(), host.Source); err != nil {
-// 		if worthARetry(err) {
-// 			waitForRetry()
-// 			goto EXEC_QUERY
-// 		} else {
-// 			err = fmt.Errorf("cannot add Host %s/%s to database: %w",
-// 				host.Name,
-// 				host.AStr(),
-// 				err)
-// 			db.log.Printf("[ERROR] %s\n", err.Error())
-// 			return err
-// 		}
-// 	} else {
-// 		var id int64
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Failed to prepare query %s: %s\n",
+			qid,
+			err.Error())
+		panic(err)
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
 
-// 		defer rows.Close() // nolint: errcheck
+	var (
+		rows *sql.Rows
+		now  = time.Now()
+	)
 
-// 		if !rows.Next() {
-// 			// CANTHAPPEN
-// 			db.log.Printf("[ERROR] Query %s did not return a value\n",
-// 				qid)
-// 			return fmt.Errorf("query %s did not return a value", qid)
-// 		} else if err = rows.Scan(&id); err != nil {
-// 			var ex = fmt.Errorf("failed to get ID for newly added host %s/%s: %w",
-// 				host.Name,
-// 				host.AStr(),
-// 				err)
-// 			db.log.Printf("[ERROR] %s\n", ex.Error())
-// 			return ex
-// 		}
+EXEC_QUERY:
+	if rows, err = stmt.Query(s.HostID, s.Port, s.Success, s.Response, now.Unix()); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot add Service %s:%d to database: %w",
+				h.AStr(),
+				s.Port,
+				err)
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	} else {
+		var id int64
 
-// 		host.ID = id
-// 		host.Added = now
-// 		return nil
-// 	}
-// }
-// func (db *Database) ServiceAdd(h *model.Host, s *model.Service) error
+		defer rows.Close() // nolint: errcheck
+
+		if !rows.Next() {
+			// CANTHAPPEN
+			db.log.Printf("[ERROR] Query %s did not return a value\n",
+				qid)
+			return fmt.Errorf("query %s did not return a value", qid)
+		} else if err = rows.Scan(&id); err != nil {
+			var ex = fmt.Errorf("failed to get ID for newly added %s:%d: %w",
+				h.AStr(),
+				s.Port,
+				err)
+			db.log.Printf("[ERROR] %s\n", ex.Error())
+			return ex
+		}
+
+		s.ID = id
+		s.Timestamp = now
+		return nil
+	}
+} // func (db *Database) ServiceAdd(h *model.Host, s *model.Service) error
