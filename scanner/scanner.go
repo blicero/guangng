@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-22 16:50:04 krylon>
+// Time-stamp: <2026-01-23 19:56:52 krylon>
 
 // Package scanner implements scanning ports. Duh.
 package scanner
@@ -72,11 +72,12 @@ type Scanner struct {
 	idCnt   int
 	active  atomic.Bool
 	pool    *database.Pool
-	hostQ   chan model.Host
+	hostQ   chan scanProposal
 	resQ    chan scanResult
 	cmdQ    chan bool
 }
 
+// New creates and returns a fresh Scanner instance.
 func New(cnt int) (*Scanner, error) {
 	var (
 		err error
@@ -92,7 +93,7 @@ func New(cnt int) (*Scanner, error) {
 	}
 
 	scn.goalCnt.Store(int32(cnt))
-	scn.hostQ = make(chan model.Host, min(2, cnt/2))
+	scn.hostQ = make(chan scanProposal, min(2, cnt/2))
 	scn.resQ = make(chan scanResult, cnt)
 	scn.cmdQ = make(chan bool)
 
@@ -247,10 +248,47 @@ func (scn *Scanner) scanWorker(id int) {
 				id,
 				h.Name,
 				h.Addr)
+
 		}
 	}
 } // func (scn *Scanner) scanWorker(id int)
 
-func (scn *Scanner) pickPort(host *model.Host) (uint16, error) {
-	var ()
-} // func (scn *Scanner) pickPort(host *model.Host) (uint16, error)
+func (scn *Scanner) pickPort(host *model.Host, ports map[uint16]bool) uint16 {
+	switch host.Source {
+	case hsrc.MX:
+		for _, p := range []uint16{25, 110, 143, 587} {
+			if !ports[p] {
+				return p
+			}
+		}
+	case hsrc.NS:
+		if !ports[53] {
+			return 53
+		}
+	}
+
+	if ftpPat.MatchString(host.Name) && !ports[21] {
+		return 21
+	} else if wwwPat.MatchString(host.Name) {
+		for _, p := range []uint16{80, 443, 8000, 8080} {
+			if !ports[p] {
+				return p
+			}
+		}
+	} else if mxPat.MatchString(host.Name) {
+		for _, p := range []uint16{25, 110, 143, 587} {
+			if !ports[p] {
+				return p
+			}
+		}
+	}
+
+	indexlist := rand.Perm(len(Ports))
+	for _, idx := range indexlist {
+		if !ports[Ports[idx]] {
+			return Ports[idx]
+		}
+	}
+
+	return 0
+} // func (scn *Scanner) pickPort(host *model.Host) uint16
