@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-20 14:11:48 krylon>
+// Time-stamp: <2026-01-24 14:04:43 krylon>
 
 package database
 
@@ -135,12 +135,12 @@ EXEC_QUERY:
 } // func (db *Database) HostGetByID(id int64) (*model.Host, error)
 
 // HostGetRandom returns up to <max> Hosts randomly picked from the database.
-func (db *Database) HostGetRandom(max int) ([]model.Host, error) {
+func (db *Database) HostGetRandom(max int) ([]*model.Host, error) {
 	const qid query.ID = query.HostGetRandom
 	var err error
 	var msg string
 	var stmt *sql.Stmt
-	var hosts []model.Host
+	var hosts []*model.Host
 
 GET_QUERY:
 	if stmt, err = db.getQuery(qid); err != nil {
@@ -174,12 +174,12 @@ EXEC_QUERY:
 		defer rows.Close() // nolint: errcheck
 	}
 
-	hosts = make([]model.Host, 0, max)
+	hosts = make([]*model.Host, 0, max)
 
 	for rows.Next() {
 		var added, contact int64
-		var host model.Host
 		var addrStr string
+		var host = new(model.Host)
 
 		if err = rows.Scan(
 			&host.ID,
@@ -202,4 +202,4 @@ EXEC_QUERY:
 	}
 
 	return hosts, nil
-} // func (db *Database) HostGetRandom(n int) ([]model.Host, error)
+} // func (db *Database) HostGetRandom(n int) ([]*model.Host, error)
