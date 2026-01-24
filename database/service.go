@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-23 15:25:13 krylon>
+// Time-stamp: <2026-01-23 18:24:30 krylon>
 
 package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -74,3 +75,72 @@ EXEC_QUERY:
 		return nil
 	}
 } // func (db *Database) ServiceAdd(h *model.Host, s *model.Service) error
+
+// ServiceGetByHost retrieves all ports that have been scanned for Host <h>,
+// and the reply we've receveiced.
+func (db *Database) ServiceGetByHost(h *model.Host) (map[uint16]*model.Service, error) {
+	const qid query.ID = query.ServiceGetByHost
+	var err error
+	var msg string
+	var stmt *sql.Stmt
+
+GET_QUERY:
+	if stmt, err = db.getQuery(qid); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto GET_QUERY
+		} else {
+			db.log.Printf("[ERROR] Error getting query %s: %s",
+				qid,
+				err.Error())
+			return nil, err
+		}
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var (
+		rows  *sql.Rows
+		ports = make(map[uint16]*model.Service)
+	)
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(h.ID); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto EXEC_QUERY
+		} else {
+			msg = fmt.Sprintf("Error querying services for Host %s (%s): %s",
+				h.Name,
+				h.AStr(),
+				err.Error())
+			db.log.Println(msg)
+			return nil, errors.New(msg)
+		}
+	} else {
+		defer rows.Close() // nolint: errcheck
+	}
+
+	for rows.Next() {
+		var (
+			svc          = &model.Service{HostID: h.ID}
+			tstamp, port int64
+		)
+
+		if err = rows.Scan(
+			&svc.ID,
+			&port,
+			&svc.Success,
+			&tstamp); err != nil {
+			msg = fmt.Sprintf("Error scanning row: %s", err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		svc.Port = uint16(port)
+		svc.Timestamp = time.Unix(tstamp, 0)
+		ports[svc.Port] = svc
+	}
+
+	return ports, nil
+} // func (db *Database) ServiceGetByHost(h *model.Host) (map[uint16]*model.Service, error)

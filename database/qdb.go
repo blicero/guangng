@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-22 18:48:09 krylon>
+// Time-stamp: <2026-01-23 18:07:39 krylon>
 
 package database
 
@@ -106,5 +106,15 @@ LIMIT ?
 INSERT INTO svc (host_id, port, success, response, timestamp)
          VALUES (      ?,    ?,       ?,        ?,         ?)
 RETURNING id
+`,
+	query.ServiceGetByHost: `
+SELECT
+    id,
+    port,
+    success,
+    COALESCE(response, ''),
+    timestamp
+FROM svc
+WHERE host_id = ?
 `,
 }
