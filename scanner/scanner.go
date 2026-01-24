@@ -53,50 +53,18 @@ var Ports []uint16 = []uint16{
 	8081,
 }
 
-func getScanPort(host *model.Host, ports map[uint16]bool) uint16 {
-	if host.Source == hsrc.MX {
-		if !ports[25] {
-			return 25
-		} else if !ports[110] {
-			return 110
-		} else if !ports[143] {
-			return 143
-		}
-	} else if (host.Source == hsrc.NS) && !ports[53] {
-		return 53
-	} else if wwwPat.MatchString(host.Name) && !ports[80] {
-		// Samstag, 05. 07. 2014, 16:37
-		// Ich weiß noch nicht, wie einfach es ist, SSL zu reden, aber
-		// wenn das kein großer Krampf ist, kann ich hier natürlich
-		// auch auf Port 443 prüfen. Dito für die Mail-Protokolle!
-		return 80
-	} else if ftpPat.MatchString(host.Name) && !ports[21] {
-		return 21
-	} else if mxPat.MatchString(host.Name) {
-		if !ports[25] {
-			return 25
-		} else if !ports[110] {
-			return 110
-		} else if !ports[143] {
-			return 143
-		}
-	}
-
-	indexlist := rand.Perm(len(Ports))
-	for _, idx := range indexlist {
-		if !ports[Ports[idx]] {
-			return Ports[idx]
-		}
-	}
-
-	return 0
-} // func get_scan_port(host *Host, ports map[uint16]bool) uint16
+type scanProposal struct {
+	host  *model.Host
+	ports map[uint16]*model.Service
+}
 
 type scanResult struct {
 	host *model.Host
 	svc  *model.Service
 }
 
+// Scanner wraps all the state need to run the portscanner subsystem across
+// multiple worker goroutines.
 type Scanner struct {
 	log     *log.Logger
 	scnt    atomic.Int32
