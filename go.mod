@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab
 	github.com/dgraph-io/badger v1.6.2
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/tonnerre/golang-dns v0.0.0-20130925195549-c07f3c3cc475
@@ -16,6 +17,7 @@ require (
 
 require (
 	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
+	github.com/alouca/gologger v0.0.0-20120904114645-7d4b7291de9c // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/dgraph-io/ristretto v0.0.2 // indirect
 	github.com/dgryski/go-farm v0.0.0-20240924180020-3414d57e47da // indirect

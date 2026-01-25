@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-23 19:56:52 krylon>
+// Time-stamp: <2026-01-25 18:15:18 krylon>
 
 // Package scanner implements scanning ports. Duh.
 package scanner
@@ -26,7 +26,7 @@ const maxErr = 5
 var wwwPat *regexp.Regexp = regexp.MustCompile("(?i)^www")
 var ftpPat *regexp.Regexp = regexp.MustCompile("(?i)^ftp")
 var mxPat *regexp.Regexp = regexp.MustCompile("(?i)^(?:mx|mail|smtp|pop|imap)")
-var newline = regexp.MustCompile("[\r\n]+$")
+var newline = regexp.MustCompile("[\r\n]+$") // nolint: unused
 
 // Ports is the list of ports (TCP and UDP) we consider interesting.
 var Ports []uint16 = []uint16{
@@ -73,7 +73,7 @@ type Scanner struct {
 	active  atomic.Bool
 	pool    *database.Pool
 	hostQ   chan scanProposal
-	resQ    chan scanResult
+	resQ    chan *scanResult
 	cmdQ    chan bool
 }
 
@@ -94,7 +94,7 @@ func New(cnt int) (*Scanner, error) {
 
 	scn.goalCnt.Store(int32(cnt))
 	scn.hostQ = make(chan scanProposal, min(2, cnt/2))
-	scn.resQ = make(chan scanResult, cnt)
+	scn.resQ = make(chan *scanResult, cnt)
 	scn.cmdQ = make(chan bool)
 
 	return scn, nil
@@ -162,7 +162,7 @@ func (scn *Scanner) feeder() {
 	defer ticker.Stop()
 
 	for scn.active.Load() {
-		var hosts []model.Host
+		var hosts []*model.Host
 
 		if hosts, err = db.HostGetRandom(int(scn.scnt.Load())); err != nil {
 			scn.log.Printf("[ERROR] Failed to get random Hosts to scan: %s\n",
@@ -175,6 +175,21 @@ func (scn *Scanner) feeder() {
 		}
 
 		for _, h := range hosts {
+			var prop = scanProposal{
+				host: h,
+			}
+
+			if prop.ports, err = db.ServiceGetByHost(h); err != nil {
+				scn.log.Printf("[ERROR] Failed to get scanned ports for %s (%s): %s\n",
+					h.Name,
+					h.AStr(),
+					err.Error())
+				if errcnt++; errcnt > maxErr {
+					scn.active.Store(false)
+					return
+				}
+
+			}
 		SEND:
 			select {
 			case <-ticker.C:
@@ -182,7 +197,7 @@ func (scn *Scanner) feeder() {
 					return
 				}
 				goto SEND
-			case scn.hostQ <- h:
+			case scn.hostQ <- prop:
 				continue
 			}
 		}
@@ -222,19 +237,25 @@ func (scn *Scanner) collector() {
 					res.svc.Port,
 					res.svc.Response)
 			}
+			if err = db.ServiceAdd(res.host, res.svc); err != nil {
+				scn.log.Printf("[ERROR] Failed to add scanned Port %s:%d to database - %s\n",
+					res.host.AStr(),
+					res.svc.Port,
+					err.Error())
+			}
 		}
 	}
 } // func (scn *Scanner) collector()
 
 func (scn *Scanner) scanWorker(id int) {
-	var ticker = time.NewTicker(common.ActiveTimeout)
-	defer ticker.Stop()
+	scn.log.Printf("[TRACE] scanWorker#%02d reporting for duty\n", id)
+	defer scn.log.Printf("[TRACE] scanWorker#%02d quitting. Bye.\n", id)
 
 	scn.scnt.Add(1)
 	defer scn.scnt.Add(-1)
 
-	scn.log.Printf("[TRACE] scanWorker#%02d reporting for duty\n",
-		id)
+	var ticker = time.NewTicker(common.ActiveTimeout)
+	defer ticker.Stop()
 
 	for scn.active.Load() {
 		select {
@@ -242,42 +263,67 @@ func (scn *Scanner) scanWorker(id int) {
 			continue
 		case <-scn.cmdQ:
 			return
-		case h := <-scn.hostQ:
+		case prop := <-scn.hostQ:
+			var (
+				err  error
+				port uint16
+				res  *scanResult
+			)
 			// Deal with it!
-			scn.log.Printf("[TRACE] scanWorker#%02d about to scan Host %s/%s\n",
+			if port = scn.pickPort(prop); port == 0 {
+				continue
+			}
+
+			scn.log.Printf("[TRACE] scanWorker#%02d about to scan %s:%d\n",
 				id,
-				h.Name,
-				h.Addr)
+				prop.host.AStr(),
+				port)
+
+			// Let's scan a port!
+			if res, err = scn.probePort(prop.host, port); err != nil {
+				scn.log.Printf("[ERROR] scanWorker#%02d failed to scan %s:%d - %s\n",
+					id,
+					prop.host.AStr(),
+					port,
+					err.Error())
+			} else {
+				scn.resQ <- res
+			}
 
 		}
 	}
 } // func (scn *Scanner) scanWorker(id int)
 
-func (scn *Scanner) pickPort(host *model.Host, ports map[uint16]bool) uint16 {
+func (scn *Scanner) pickPort(prop scanProposal) uint16 {
+	var (
+		host  = prop.host
+		ports = prop.ports
+	)
+
 	switch host.Source {
 	case hsrc.MX:
 		for _, p := range []uint16{25, 110, 143, 587} {
-			if !ports[p] {
+			if ports[p] == nil {
 				return p
 			}
 		}
 	case hsrc.NS:
-		if !ports[53] {
+		if ports[53] == nil {
 			return 53
 		}
 	}
 
-	if ftpPat.MatchString(host.Name) && !ports[21] {
+	if ftpPat.MatchString(host.Name) && ports[21] == nil {
 		return 21
 	} else if wwwPat.MatchString(host.Name) {
 		for _, p := range []uint16{80, 443, 8000, 8080} {
-			if !ports[p] {
+			if ports[p] == nil {
 				return p
 			}
 		}
 	} else if mxPat.MatchString(host.Name) {
 		for _, p := range []uint16{25, 110, 143, 587} {
-			if !ports[p] {
+			if ports[p] == nil {
 				return p
 			}
 		}
@@ -285,10 +331,10 @@ func (scn *Scanner) pickPort(host *model.Host, ports map[uint16]bool) uint16 {
 
 	indexlist := rand.Perm(len(Ports))
 	for _, idx := range indexlist {
-		if !ports[Ports[idx]] {
+		if ports[Ports[idx]] == nil {
 			return Ports[idx]
 		}
 	}
 
 	return 0
-} // func (scn *Scanner) pickPort(host *model.Host) uint16
+} // func (scn *Scanner) pickPort(prop scanProposal) uint16
