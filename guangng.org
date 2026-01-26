@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-01-26 17:56:01 krylon>
+# Time-stamp: <2026-01-26 20:16:53 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -15,13 +15,13 @@
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-01-26 Mo 17:56]
+   #+CAPTION: Clock summary at [2026-01-26 Mo 20:16]
    | Headline                                     | Time       |            |      |      |
    |----------------------------------------------+------------+------------+------+------|
-   | *Total time*                                 | *1d 13:05* |            |      |      |
+   | *Total time*                                 | *1d 13:24* |            |      |      |
    |----------------------------------------------+------------+------------+------+------|
-   | *GuangNG [9/9]*                              | *1d 13:05* |            |      |      |
-   | \_  /Components [3/3]/                       |            | /1d 11:43/ |      |      |
+   | *GuangNG [9/9]*                              | *1d 13:24* |            |      |      |
+   | \_  /Components [3/3]/                       |            | /1d 12:02/ |      |      |
    | \_    Main [0/0]                             |            |            | 0:15 |      |
    | \_    Model [0/0]                            |            |            | 1:37 |      |
    | \_    Database [1/1]                         |            |            | 5:33 |      |
@@ -33,7 +33,7 @@
    | \_    XFR [0/0]                              |            |            | 5:52 |      |
    | \_    Scanner [0/0]                          |            |            | 8:35 |      |
    | \_    Nexus [0/0]                            |            |            | 1:46 |      |
-   | \_    Web UI [0/0]                           |            |            | 1:29 |      |
+   | \_    Web UI [0/0]                           |            |            | 1:48 |      |
    | \_  /Features [4/4]/                         |            | /0:43/     |      |      |
    | \_    Allow starting subsystems with zero... |            |            | 0:43 |      |
    | \_      Generator                            |            |            |      | 0:18 |
@@ -160,6 +160,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2026-01-26 Mo 19:57]--[2026-01-26 Mo 20:16] =>  0:19
     CLOCK: [2026-01-26 Mo 16:26]--[2026-01-26 Mo 17:55] =>  1:29
     :END:
     Now that the core is sorta-kinda working, I need a UI to watch the engine
