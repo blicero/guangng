@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-22 15:50:10 krylon>
+// Time-stamp: <2026-01-26 15:24:17 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -45,8 +45,9 @@ type XFR struct {
 // New returns a new XFR instance.
 func New(cnt int) (*XFR, error) {
 	var (
-		err error
-		x   = new(XFR)
+		err  error
+		xcnt = max(cnt, 2)
+		x    = new(XFR)
 	)
 
 	if x.log, err = common.GetLogger(logdomain.XFR); err != nil {
@@ -58,9 +59,9 @@ func New(cnt int) (*XFR, error) {
 	}
 
 	x.xcnt.Store(int32(cnt))
-	x.cmdQ = make(chan bool, cnt)
-	x.xfrQ = make(chan *model.Zone, cnt)
-	x.hostQ = make(chan *model.Host, cnt)
+	x.cmdQ = make(chan bool, xcnt)
+	x.xfrQ = make(chan *model.Zone, xcnt)
+	x.hostQ = make(chan *model.Host, xcnt)
 	x.res = new(dns.Client)
 	x.blAddr = blacklist.NewBlacklistAddr()
 	x.blName = blacklist.NewBlacklistName()
@@ -78,7 +79,6 @@ func (x *XFR) IsActive() bool {
 // Start sets the XFR engine's active flag and starts the set number of
 // worker goroutines.
 func (x *XFR) Start() {
-	x.log.Println("[ERROR] IMPLEMENTME!!!")
 	x.active.Store(true)
 
 	go x.hostWorker()
@@ -148,6 +148,13 @@ func (x *XFR) xfrFeeder() {
 		)
 
 		x.log.Printf("[TRACE] Query for up to %d unfinished XFRs\n", batchSize)
+		if batchSize == 0 {
+			if !x.active.Load() {
+				return
+			}
+			time.Sleep(common.ActiveTimeout)
+			continue
+		}
 
 		if xlist, err = db.XFRGetUnfinished(batchSize); err != nil {
 			x.log.Printf("[ERROR] Failed to get %d unfinished XFRs: %s\n",

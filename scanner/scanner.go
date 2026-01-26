@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-25 18:15:18 krylon>
+// Time-stamp: <2026-01-26 15:11:26 krylon>
 
 // Package scanner implements scanning ports. Duh.
 package scanner
@@ -80,21 +80,22 @@ type Scanner struct {
 // New creates and returns a fresh Scanner instance.
 func New(cnt int) (*Scanner, error) {
 	var (
-		err error
-		scn = new(Scanner)
+		err  error
+		scnt = max(cnt, 2)
+		scn  = new(Scanner)
 	)
 
 	if scn.log, err = common.GetLogger(logdomain.Scanner); err != nil {
 		return nil, err
-	} else if scn.pool, err = database.NewPool(cnt); err != nil {
+	} else if scn.pool, err = database.NewPool(scnt); err != nil {
 		scn.log.Printf("[CRITICAL] Failed to open DB pool: %s\n",
 			err.Error())
 		return nil, err
 	}
 
 	scn.goalCnt.Store(int32(cnt))
-	scn.hostQ = make(chan scanProposal, min(2, cnt/2))
-	scn.resQ = make(chan *scanResult, cnt)
+	scn.hostQ = make(chan scanProposal, max(2, scnt/2))
+	scn.resQ = make(chan *scanResult, scnt)
 	scn.cmdQ = make(chan bool)
 
 	return scn, nil

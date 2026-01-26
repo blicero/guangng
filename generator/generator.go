@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 20:29:53 krylon>
+// Time-stamp: <2026-01-26 15:04:58 krylon>
 
 package generator
 
@@ -66,7 +66,7 @@ func (c *cache) check(addr net.IP) (bool, error) {
 		} else if err != nil {
 			c.log.Printf("[ERROR] Failed to lookup %s in cache: %s\n",
 				addr,
-				err.Error)
+				err.Error())
 			return err
 		} else {
 			present = true
@@ -106,6 +106,10 @@ func New(icnt, ncnt int) (*Generator, error) {
 		}
 	)
 
+	if (icnt == 0) != (ncnt == 0) {
+		panic("Worker counts must both be non-zero or both be zero")
+	}
+
 	if gen.log, err = common.GetLogger(logdomain.Generator); err != nil {
 		return nil, err
 	} else if gen.cache, err = openCache(); err != nil {
@@ -114,12 +118,17 @@ func New(icnt, ncnt int) (*Generator, error) {
 		return nil, err
 	}
 
+	var aqcnt, nqcnt int
+
+	aqcnt = max(gen.iCnt, 2)
+	nqcnt = max(gen.nCnt, 2)
+
 	gen.blAddr = blacklist.NewBlacklistAddr()
 	gen.blName = blacklist.NewBlacklistName()
-	gen.ipQ = make(chan net.IP, icnt)
-	gen.hostQ = make(chan *model.Host, ncnt)
-	gen.ctlQAddr = make(chan bool, icnt)
-	gen.ctlQName = make(chan bool, ncnt)
+	gen.ipQ = make(chan net.IP, aqcnt)
+	gen.hostQ = make(chan *model.Host, nqcnt)
+	gen.ctlQAddr = make(chan bool, aqcnt)
+	gen.ctlQName = make(chan bool, nqcnt)
 
 	return gen, nil
 } // func New() (*Generator, error)
