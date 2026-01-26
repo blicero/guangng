@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2025-08-29 20:23:46 krylon>
+// Time-stamp: <2026-01-26 16:33:14 krylon>
 
 package web
 
@@ -17,7 +17,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/blicero/carebear/common"
+	"github.com/blicero/guangng/common"
 
 	"github.com/mborgerson/GoTruncateHtml/truncatehtml"
 )

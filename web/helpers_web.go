@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 09. 2019 by Benjamin Walkenhorst
 // (c) 2019 Benjamin Walkenhorst
-// Time-stamp: <2025-07-14 14:36:55 krylon>
+// Time-stamp: <2026-01-26 16:33:23 krylon>
 //
 // Helper functions for use by the HTTP request handlers
 
@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/blicero/carebear/common"
+	"github.com/blicero/guangng/common"
 )
 
 func errJSON(msg string) []byte { // nolint: unused,deadcode

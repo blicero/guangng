@@ -12,7 +12,9 @@ require (
 require (
 	github.com/alouca/gosnmp v0.0.0-20170620005048-04d83944c9ab
 	github.com/dgraph-io/badger v1.6.2
+	github.com/gorilla/mux v1.8.1
 	github.com/mattn/go-sqlite3 v1.14.33
+	github.com/mborgerson/GoTruncateHtml v0.0.0-20150507032438-125d9154cd1e
 	github.com/tonnerre/golang-dns v0.0.0-20130925195549-c07f3c3cc475
 )
 
