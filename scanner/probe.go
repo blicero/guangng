@@ -234,6 +234,7 @@ func (scn *Scanner) scanHTTP(host *model.Host, port uint16) (*scanResult, error)
 			Port:      port,
 			Response:  newline.ReplaceAllString(response.Header.Get("Server"), ""),
 			Timestamp: time.Now(),
+			Success:   true,
 		},
 	}
 
