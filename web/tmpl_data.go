@@ -1,8 +1,8 @@
-// /home/krylon/go/src/carebear/web/tmpl_data.go
+// /home/krylon/go/src/guangng/web/tmpl_data.go
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 16:34:37 krylon>
+// Time-stamp: <2026-01-26 20:01:24 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -17,6 +17,14 @@ type tmplDataBase struct { // nolint: unused
 
 type tmplDataIndex struct { // nolint: unused,deadcode
 	tmplDataBase
+	GenActive  bool
+	XFRActive  bool
+	ScanActive bool
+	GenAddrCnt int
+	GenNameCnt int
+	XFRCnt     int
+	ScanCnt    int
+	HostCnt    int
 }
 
 // type tmplDataNetworkAll struct { // nolint: unused,deadcode

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 17:55:22 krylon>
+// Time-stamp: <2026-01-26 20:01:30 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -159,6 +159,17 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 			},
 		}
 	)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
 } // func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request)
 
 //////////////////////////////////////////////////////////////////////////////
