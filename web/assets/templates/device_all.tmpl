@@ -1,0 +1,72 @@
+{{ define "device_all" }}
+{{/* Created on 10. 06. 2024 */}}
+{{/* Time-stamp: <2025-09-06 16:20:50 krylon> */}}
+<!DOCTYPE html>
+<html>
+    {{ template "head" . }}
+
+    <body>
+        {{ template "intro" . }}
+
+        <div class="container-fluid" id="device-list">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Status</th>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>OS</th>
+                        <th>BigHead</th>
+                        <th>Last Contact</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{ $data := . }}
+                    {{ $umap := .Updates }}
+                    {{ range .Devices }}
+                    {{ $updates := index $umap .ID }}
+                    <tr>
+                        <td>{{ .ID }}</td>
+                        <td>
+                            {{ if .IsLive }}<img src="/static/green_button.png"
+                                                 width="24"
+                                                 height="24" />{{ end }}
+                            {{ if le ($data.DiskFree .ID) 7 }}
+                            <img src="/static/user-trash-full.png"
+                                 width="24"
+                                 height="24" />
+                            {{ end }}
+                            {{ if $updates.UpdatesPending }}
+                            <img src="/static/software-update-available.png"
+                                 width="24"
+                                 height="24" />
+                            {{ end -}}
+                        </td>
+                        <td>
+                            <a href="/device/{{ .ID }}">
+                                {{ .Name }}
+                            </a>
+                        </td>
+                        <td>{{ .Addr }}</td>
+                        <td>
+                            {{ .OS }}
+                        </td>
+                        <td>
+                            <img src="/static/face-{{- if .BigHead -}}glasses{{- else -}}tired{{- end -}}.png"
+                                 width="24"
+                                 height="24" />
+                        </td>
+                        <td> {{ since .LastSeen }} <small>({{ fmt_time .LastSeen }})</small>
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        {{ template "footer" . }}
+    </body>
+</html>
+{{ end }}

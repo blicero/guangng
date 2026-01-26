@@ -1,0 +1,50 @@
+{{ define "network_details" }}
+{{/* Created on 10. 06. 2024 */}}
+{{/* Time-stamp: <2025-08-09 16:39:38 krylon> */}}
+<!DOCTYPE html>
+<html>
+    {{ template "head" . }}
+
+    <body>
+        {{ template "intro" . }}
+
+        <div id="form_network" class="container-fluid">
+            {{ template "network_form" . }}
+        </div>
+
+        <hr />
+
+        <div id="list_devices" class="container-fluid">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>BigHead</th>
+                        <th>Last Contact</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{ range .Devices }}
+                    <tr {{- if .IsLive }} class="online"{{ end }}>
+                        <td>{{ .ID }}</td>
+                        <td>
+                            <a href="/device/{{ .ID }}">
+                                {{ .Name }}
+                            </a>
+                        </td>
+                        <td>{{ .Addr }}</td>
+                        <td>{{ if .BigHead }}Yes{{ else }}No{{ end }}</td>
+                        <td>{{ fmt_time .LastSeen }}
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        {{ template "footer" . }}
+    </body>
+</html>
+{{ end }}

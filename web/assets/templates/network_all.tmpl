@@ -1,0 +1,57 @@
+{{ define "network_all" }}
+{{/* Created on 10. 06. 2024 */}}
+{{/* Time-stamp: <2025-09-05 18:42:27 krylon> */}}
+<!DOCTYPE html>
+<html>
+    {{ template "head" . }}
+
+    <body>
+        {{ template "intro" . }}
+
+        <div id="network_form" class="container-fluid">
+            {{ template "network_form" . }}
+        </div>
+
+        <div id="table_networks" class="container-fluid">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Address</th>
+                        <th>Description</th>
+                        <th># Devices</th>
+                        <th>Last Scan</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{ $cnt := .DevCnt }}
+                    {{ $scans := .Scans }}
+                    {{ range .Networks }}
+                    <tr>
+                        <td>{{ .ID }}</td>
+                        <td>
+                            <a href="/network/{{ .ID }}">
+                                {{ .Addr }}
+                            </a>
+                        </td>
+                        <td>{{ .Description }}</td>
+                        <td>{{ index $cnt .ID }}</td>
+                        <td>
+                            {{ $prog := index $scans .ID }}
+                            {{ if eq $prog nil }}
+                            {{ fmt_time .LastScan }}
+                            {{ else }}
+                            Now (Scanned: {{ $prog.Scanned }}, Added: {{ $prog.Added }})
+                            {{ end }}
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        {{ template "footer" . }}
+    </body>
+</html>
+{{ end }}

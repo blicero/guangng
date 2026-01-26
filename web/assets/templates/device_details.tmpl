@@ -1,0 +1,90 @@
+{{ define "device_details" }}
+{{/* Created on 10. 06. 2024 */}}
+{{/* Time-stamp: <2025-08-29 20:14:34 krylon> */}}
+<!DOCTYPE html>
+<html>
+    {{ template "head" . }}
+
+    <body>
+        {{ template "intro" . }}
+
+        <div id="form_device" class="container-fluid">
+            <details>
+                <summary>Edit</summary>
+                {{ template "device_form" . }}
+            </details>
+        </div>
+
+        <hr />
+
+        <hr />
+
+        <div class="container-fluid" id="device-details">
+            <table class="horizontal table table-striped">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ .Device.ID }}</td>
+                </tr>
+                <tr>
+                    <th>Network</th>
+                    <td>
+                        <a href="/network/{{ .Network.ID }}">
+                            {{ .Network.Addr }}
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ .Device.Name }}{{ if .Device.IsLive }} <img src="/static/green_button.png" width="24" height="24" />{{ end }}</td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td>{{ .Device.AddrStr }}</td>
+                </tr>
+                <tr>
+                    <th>OS</th>
+                    <td>{{ .Device.OS }}</td>
+                </tr>
+                <tr>
+                    <th>BigHead?</th>
+                    <td>{{ .Device.BigHead }}</td>
+                </tr>
+                <tr>
+                    <th>Last Contact</th>
+                    <td>{{ fmt_time .Device.LastSeen }}</td>
+                </tr>
+                {{ if ne .Uptime nil }}
+                <tr>
+                    <th>Load Average</th>
+                    <td>{{ fmt_time .Uptime.Timestamp }} --
+                        {{ index .Uptime.Load 0 }} /
+                        {{ index .Uptime.Load 1 }} /
+                        {{ index .Uptime.Load 2 }}</td>
+                </tr>
+                {{ end }}
+            </table>
+        </div>
+
+        <div class="container-fluid" id="device-updates">
+            {{ if ne .Updates nil }}
+            <h2>Pending Updates</h2>
+
+            Last checked {{ since .Updates.Timestamp }} ago
+            ({{ fmt_time .Updates.Timestamp }})
+
+            <table class="table table-striped output">
+                {{ range .Updates.AvailableUpdates }}
+                <tr>
+                    <td>{{ . }}</td>
+                </tr>
+                {{ end }}
+            </table>
+            {{ else }}
+            no information on pending updates available
+            {{ end }}
+        </div>
+
+        {{ template "footer" . }}
+    </body>
+</html>
+{{ end }}
