@@ -78,6 +78,9 @@ func (c *cache) check(addr net.IP) (bool, error) {
 	return present, err
 } // func (c *cache) check(addr net.IP) bool
 
+// Generator generates random Hosts, checking them against blacklists
+// and ensuring that the IP address resolves to a valid PTR (i.e. that the
+// generated Host is likely to exist on the Internet).
 type Generator struct {
 	log        *log.Logger
 	cache      *cache
