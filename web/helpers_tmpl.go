@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 16:33:14 krylon>
+// Time-stamp: <2026-01-26 16:44:47 krylon>
 
 package web
 
@@ -97,7 +97,7 @@ func cycleGen(values []string, i int) string {
 
 func sequenceFunc(values ...string) (*generator, error) {
 	if len(values) == 0 {
-		return nil, errors.New("Sequence must have at least one element")
+		return nil, errors.New("sequence must have at least one element")
 	}
 
 	return &generator{
@@ -109,7 +109,7 @@ func sequenceFunc(values ...string) (*generator, error) {
 
 func cycleFunc(values ...string) (*generator, error) {
 	if len(values) == 0 {
-		return nil, errors.New("Cycle must have at least one element")
+		return nil, errors.New("cycle must have at least one element")
 	}
 
 	return &generator{
