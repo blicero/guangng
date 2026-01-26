@@ -1,6 +1,7 @@
+// Time-stamp: <2026-01-26 14:06:47 krylon>
 module github.com/blicero/guangng
 
-go 1.25.5
+go 1.25.1
 
 require (
 	github.com/blicero/krylib v0.2.1
