@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-01-26 14:04:32 krylon>
+# Time-stamp: <2026-01-26 15:49:23 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -8,38 +8,44 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* GuangNG [4/4]
+* GuangNG [9/9]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-01-26 Mo 14:04]
-   | Headline                                  | Time       |            |      |      |
-   |-------------------------------------------+------------+------------+------+------|
-   | *Total time*                              | *1d 10:27* |            |      |      |
-   |-------------------------------------------+------------+------------+------+------|
-   | *GuangNG [4/4]*                           | *1d 10:27* |            |      |      |
-   | \_  /Components [3/3]/                    |            | /1d 10:14/ |      |      |
-   | \_    Main [0/0]                          |            |            | 0:15 |      |
-   | \_    Model [0/0]                         |            |            | 1:37 |      |
-   | \_    Database [1/1]                      |            |            | 5:33 |      |
-   | \_      Add queries/methods for services  |            |            |      | 2:58 |
-   | \_    Blacklist [0/0]                     |            |            | 1:08 |      |
-   | \_      Testing                           |            |            |      | 0:12 |
-   | \_    Generator [2/2]                     |            |            | 9:28 |      |
-   | \_      Sanity-check zones for XFR        |            |            |      | 0:47 |
-   | \_    XFR [0/0]                           |            |            | 5:52 |      |
-   | \_    Scanner [0/0]                       |            |            | 8:35 |      |
-   | \_    Nexus [0/0]                         |            |            | 1:46 |      |
-   | \_  /Bugs [1/1]/                          |            | /0:13/     |      |      |
-   | \_    Query XFRAdd did not return a value |            |            | 0:13 |      |
+   #+CAPTION: Clock summary at [2026-01-26 Mo 15:49]
+   | Headline                                     | Time       |            |      |      |
+   |----------------------------------------------+------------+------------+------+------|
+   | *Total time*                                 | *1d 11:36* |            |      |      |
+   |----------------------------------------------+------------+------------+------+------|
+   | *GuangNG [9/9]*                              | *1d 11:36* |            |      |      |
+   | \_  /Components [3/3]/                       |            | /1d 10:14/ |      |      |
+   | \_    Main [0/0]                             |            |            | 0:15 |      |
+   | \_    Model [0/0]                            |            |            | 1:37 |      |
+   | \_    Database [1/1]                         |            |            | 5:33 |      |
+   | \_      Add queries/methods for services     |            |            |      | 2:58 |
+   | \_    Blacklist [0/0]                        |            |            | 1:08 |      |
+   | \_      Testing                              |            |            |      | 0:12 |
+   | \_    Generator [2/2]                        |            |            | 9:28 |      |
+   | \_      Sanity-check zones for XFR           |            |            |      | 0:47 |
+   | \_    XFR [0/0]                              |            |            | 5:52 |      |
+   | \_    Scanner [0/0]                          |            |            | 8:35 |      |
+   | \_    Nexus [0/0]                            |            |            | 1:46 |      |
+   | \_  /Features [4/4]/                         |            | /0:43/     |      |      |
+   | \_    Allow starting subsystems with zero... |            |            | 0:43 |      |
+   | \_      Generator                            |            |            |      | 0:18 |
+   | \_      XFR                                  |            |            |      | 0:07 |
+   | \_      Scanner                              |            |            |      | 0:14 |
+   | \_  /Bugs [2/2]/                             |            | /0:39/     |      |      |
+   | \_    Query XFRAdd did not return a value    |            |            | 0:13 |      |
+   | \_    Segmentation Violation Blues           |            |            | 0:26 |      |
    #+END:
 ** Components [3/3]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
-   :VISIBILITY:
+   :VISIBILITY: children
    :END:
 *** Main [0/0]
     :LOGBOOK:
@@ -48,7 +54,7 @@
 *** Model [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
     :LOGBOOK:
     CLOCK: [2026-01-20 Di 13:28]--[2026-01-20 Di 13:33] =>  0:05
@@ -58,7 +64,7 @@
 *** Database [1/1]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
     :LOGBOOK:
     CLOCK: [2026-01-21 Mi 15:45]--[2026-01-21 Mi 16:01] =>  0:16
@@ -78,7 +84,7 @@
 *** Blacklist [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
     :LOGBOOK:
     CLOCK: [2026-01-12 Mo 14:05]--[2026-01-12 Mo 15:01] =>  0:56
@@ -90,7 +96,7 @@
 *** Generator [2/2]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
     :LOGBOOK:
     CLOCK: [2026-01-16 Fr 16:59]--[2026-01-16 Fr 19:10] =>  2:11
@@ -113,7 +119,7 @@
 *** XFR [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
     :LOGBOOK:
     CLOCK: [2026-01-22 Do 14:25]--[2026-01-22 Do 14:47] =>  0:22
@@ -128,7 +134,7 @@
 *** Scanner [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
     :LOGBOOK:
     CLOCK: [2026-01-25 So 18:17]--[2026-01-25 So 19:03] =>  0:46
@@ -140,7 +146,7 @@
 *** Nexus [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
     :LOGBOOK:
     CLOCK: [2026-01-26 Mo 13:46]--[2026-01-26 Mo 14:04] =>  0:18
@@ -150,17 +156,41 @@
 *** Web UI [0/0]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
-    :VISIBILITY:
+    :VISIBILITY: children
     :END:
-** Features [0/0]
+** Features [4/4]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
-   :VISIBILITY:
+   :VISIBILITY: children
    :END:
-** Bugs [1/1]
+*** DONE Allow starting subsystems with zero workers [3/3]
+    CLOSED: [2026-01-26 Mo 15:22]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2026-01-26 Mo 14:39]--[2026-01-26 Mo 14:43] =>  0:04
+    :END:
+**** DONE Generator
+     CLOSED: [2026-01-26 Mo 15:08]
+     :LOGBOOK:
+     CLOCK: [2026-01-26 Mo 14:43]--[2026-01-26 Mo 15:01] =>  0:18
+     :END:
+**** DONE XFR
+     CLOSED: [2026-01-26 Mo 15:08]
+     :LOGBOOK:
+     CLOCK: [2026-01-26 Mo 15:01]--[2026-01-26 Mo 15:08] =>  0:07
+     :END:
+**** DONE Scanner
+     CLOSED: [2026-01-26 Mo 15:22]
+     :LOGBOOK:
+     CLOCK: [2026-01-26 Mo 15:08]--[2026-01-26 Mo 15:22] =>  0:14
+     :END:
+** Bugs [2/2]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
-   :VISIBILITY:
+   :VISIBILITY: children
    :END:
 *** DONE Query XFRAdd did not return a value
     CLOSED: [2026-01-19 Mo 20:00]
@@ -172,3 +202,8 @@
     ...
     Turns out it was due to a badly written table constraint.
     I rewrote the constraint, the error message no longer appears. (For now.)
+*** DONE Segmentation Violation Blues
+    CLOSED: [2026-01-26 Mo 15:49]
+    :LOGBOOK:
+    CLOCK: [2026-01-26 Mo 15:23]--[2026-01-26 Mo 15:49] =>  0:26
+    :END:
