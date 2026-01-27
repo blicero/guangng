@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 14:01:51 krylon>
+// Time-stamp: <2026-01-27 16:21:33 krylon>
 
 package main
 
@@ -39,14 +39,20 @@ func main() {
 		err                    error
 		nx                     *nexus.Nexus
 		aCnt, nCnt, xCnt, sCnt int
+		version                bool
 	)
 
 	flag.IntVar(&aCnt, "acnt", defaultACnt, "Number of address generator workers")
 	flag.IntVar(&nCnt, "ncnt", defaultNCnt, "Number of name resolution workers")
 	flag.IntVar(&xCnt, "xcnt", defaultXCnt, "Number of AXFR workers")
 	flag.IntVar(&sCnt, "scnt", defaultScnt, "Number of scan workers")
+	flag.BoolVar(&version, "version", false, "Display the version number and exit")
 
 	flag.Parse()
+
+	if version {
+		os.Exit(0)
+	}
 
 	if nx, err = nexus.New(aCnt, nCnt, xCnt, sCnt); err != nil {
 		fmt.Fprintf(
