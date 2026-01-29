@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-20 13:28:59 krylon>
+// Time-stamp: <2026-01-28 17:47:44 krylon>
 
 // Package model provides the data types our application deals with.
 package model
@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/blicero/guangng/model/hsrc"
+	"github.com/blicero/guangng/model/subsystem"
 )
 
 var zonePat = regexp.MustCompile("^[^.]+[.](.*?)[.]?$")
@@ -67,4 +68,12 @@ type Service struct {
 	Success   bool
 	Response  string
 	Timestamp time.Time
+}
+
+type Subsystem interface {
+	IsActive() bool
+	Start()
+	Stop()
+	WorkerCount() int
+	System() subsystem.ID
 }

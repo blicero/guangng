@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 15:24:17 krylon>
+// Time-stamp: <2026-01-28 17:52:01 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -25,6 +25,7 @@ import (
 	"github.com/blicero/guangng/logdomain"
 	"github.com/blicero/guangng/model"
 	"github.com/blicero/guangng/model/hsrc"
+	"github.com/blicero/guangng/model/subsystem"
 	dns "github.com/tonnerre/golang-dns"
 )
 
@@ -93,6 +94,14 @@ func (x *XFR) Start() {
 func (x *XFR) Stop() {
 	x.active.Store(false)
 } // func (x *XFR) Stop()
+
+func (x *XFR) WorkerCount() int {
+	return int(x.xcnt.Load())
+} // func (x *XFR) WorkerCount() int
+
+func (x *XFR) System() subsystem.ID {
+	return subsystem.XFR
+} // func (x *XFR) System() subsystem.ID
 
 func (x *XFR) hostWorker() {
 	x.log.Println("[DEBUG] hostWorker starting up...")

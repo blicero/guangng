@@ -2,11 +2,12 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 16. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 13:48:49 krylon>
+// Time-stamp: <2026-01-28 17:01:24 krylon>
 
 package nexus
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -14,6 +15,7 @@ import (
 	"github.com/blicero/guangng/common"
 	"github.com/blicero/guangng/generator"
 	"github.com/blicero/guangng/logdomain"
+	"github.com/blicero/guangng/model/subsystem"
 	"github.com/blicero/guangng/scanner"
 	"github.com/blicero/guangng/xfr"
 )
@@ -76,3 +78,29 @@ func (nx *Nexus) Stop() {
 	nx.xfr.Stop()
 	nx.scn.Stop()
 } // func (nx *Nexus) Stop()
+
+// GetActiveFlag returns the active flag of the specified subsystem.
+func (nx *Nexus) GetActiveFlag(sub subsystem.ID) bool {
+	switch sub {
+	case subsystem.Generator, subsystem.GeneratorAddress, subsystem.GeneratorName:
+		return nx.gen.IsActive()
+	case subsystem.XFR:
+		return nx.xfr.IsActive()
+	case subsystem.Scanner:
+		return nx.scn.IsActive()
+	default:
+		var err = fmt.Errorf("invalid subsystem ID: %s (%d)",
+			sub,
+			sub)
+		nx.log.Printf("[ERROR] %s\n", err.Error())
+		panic(err)
+	}
+} // func (nx *Nexus) GetActiveFlag(sub subsystem.ID) bool
+
+// GetWorkerCount returns the number of active workers in a subsystem.
+// func (nx *Nexus) GetWorkerCount(sub subsystem.ID) int {
+// 	switch sub {
+// 	case subsystem.Generator:
+// 		return nx.gen.
+// 	}
+// } // func (nx *Nexus) GetWorkerCount(sub subsystem.ID) int

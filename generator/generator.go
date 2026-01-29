@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 15:04:58 krylon>
+// Time-stamp: <2026-01-29 18:13:57 krylon>
 
 package generator
 
@@ -21,6 +21,7 @@ import (
 	"github.com/blicero/guangng/logdomain"
 	"github.com/blicero/guangng/model"
 	"github.com/blicero/guangng/model/hsrc"
+	"github.com/blicero/guangng/model/subsystem"
 	"github.com/dgraph-io/badger"
 )
 
@@ -157,6 +158,14 @@ func (gen *Generator) Stop() {
 func (gen *Generator) IsActive() bool {
 	return gen.active.Load()
 } // func (gen *Generator) IsActive() bool
+
+func (gen *Generator) WorkerCount() int {
+	return gen.iCnt + gen.nCnt
+} // func (gen *Generator) WorkerCount() int
+
+func (gen *Generator) System() subsystem.ID {
+	return subsystem.Generator
+} // func (gen *Generator) System() subsystem.ID
 
 func (gen *Generator) addrWorker(id int) {
 	const maxErr = 5

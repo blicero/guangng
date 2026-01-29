@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 15:11:26 krylon>
+// Time-stamp: <2026-01-29 18:15:39 krylon>
 
 // Package scanner implements scanning ports. Duh.
 package scanner
@@ -19,6 +19,7 @@ import (
 	"github.com/blicero/guangng/logdomain"
 	"github.com/blicero/guangng/model"
 	"github.com/blicero/guangng/model/hsrc"
+	"github.com/blicero/guangng/model/subsystem"
 )
 
 const maxErr = 5
@@ -102,9 +103,13 @@ func New(cnt int) (*Scanner, error) {
 } // func New(cnt int) (*Scanner, error)
 
 // WorkerCnt returns the number of active workers.
-func (scn *Scanner) WorkerCnt() int32 {
-	return scn.scnt.Load()
+func (scn *Scanner) WorkerCnt() int {
+	return int(scn.scnt.Load())
 } // func (scn *Scanner) WorkerCnt() int32
+
+func (scn *Scanner) System() subsystem.ID {
+	return subsystem.Scanner
+} // func (scn *Scanner) System() subsystem.ID
 
 // IsActive returns state of the Scanner's active flag.
 func (scn *Scanner) IsActive() bool {
