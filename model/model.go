@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-28 17:47:44 krylon>
+// Time-stamp: <2026-01-29 20:52:35 krylon>
 
 // Package model provides the data types our application deals with.
 package model
@@ -74,6 +74,8 @@ type Subsystem interface {
 	IsActive() bool
 	Start()
 	Stop()
+	StartOne()
+	StopOne()
 	WorkerCount() int
 	System() subsystem.ID
 }
