@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 16. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-28 17:01:24 krylon>
+// Time-stamp: <2026-01-30 14:17:20 krylon>
 
 package nexus
 
@@ -98,9 +98,22 @@ func (nx *Nexus) GetActiveFlag(sub subsystem.ID) bool {
 } // func (nx *Nexus) GetActiveFlag(sub subsystem.ID) bool
 
 // GetWorkerCount returns the number of active workers in a subsystem.
-// func (nx *Nexus) GetWorkerCount(sub subsystem.ID) int {
-// 	switch sub {
-// 	case subsystem.Generator:
-// 		return nx.gen.
-// 	}
-// } // func (nx *Nexus) GetWorkerCount(sub subsystem.ID) int
+func (nx *Nexus) GetWorkerCount(sub subsystem.ID) int {
+	switch sub {
+	case subsystem.Generator:
+		return nx.gen.WorkerCount()
+	case subsystem.GeneratorAddress:
+		return nx.gen.AddrWorkerCount()
+	case subsystem.GeneratorName:
+		return nx.gen.NameWorkerCount()
+	case subsystem.XFR:
+		return nx.xfr.WorkerCount()
+	case subsystem.Scanner:
+		return nx.scn.WorkerCnt()
+	default:
+		nx.log.Printf("[ERROR] Invalid Subsystem ID %s (%d)\n",
+			sub,
+			sub)
+		return -1
+	}
+} // func (nx *Nexus) GetWorkerCount(sub subsystem.ID) int
