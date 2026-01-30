@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-27 16:21:33 krylon>
+// Time-stamp: <2026-01-30 15:16:15 krylon>
 
 package main
 
@@ -16,6 +16,7 @@ import (
 
 	"github.com/blicero/guangng/common"
 	"github.com/blicero/guangng/nexus"
+	"github.com/blicero/guangng/web"
 )
 
 const (
@@ -38,15 +39,22 @@ func main() {
 	var (
 		err                    error
 		nx                     *nexus.Nexus
+		srv                    *web.Server
 		aCnt, nCnt, xCnt, sCnt int
 		version                bool
+		addr, defaultAddr      string
+		delay                  int
 	)
+
+	defaultAddr = fmt.Sprintf("[::1]:%d", common.WebPort)
 
 	flag.IntVar(&aCnt, "acnt", defaultACnt, "Number of address generator workers")
 	flag.IntVar(&nCnt, "ncnt", defaultNCnt, "Number of name resolution workers")
 	flag.IntVar(&xCnt, "xcnt", defaultXCnt, "Number of AXFR workers")
 	flag.IntVar(&sCnt, "scnt", defaultScnt, "Number of scan workers")
 	flag.BoolVar(&version, "version", false, "Display the version number and exit")
+	flag.StringVar(&addr, "addr", defaultAddr, "Address for the web UI to listen on")
+	flag.IntVar(&delay, "delay", 5, "Delay before starting all the moving parts")
 
 	flag.Parse()
 
@@ -60,7 +68,24 @@ func main() {
 			"Failed to create Nexus: %s\n",
 			err.Error())
 		os.Exit(1)
+	} else if srv, err = web.Create(addr, nx); err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"Failed to create web server: %s\n",
+			err.Error())
+		os.Exit(1)
 	}
+
+	fmt.Printf("WebUI is running on %s\n", addr)
+
+	for i := range delay {
+		fmt.Printf("\r%d                           ",
+			(delay - (i + 1)))
+		os.Stdout.Sync() // nolint: errcheck
+		time.Sleep(time.Second)
+	}
+
+	fmt.Printf("\n")
 
 	var (
 		ticker = time.NewTicker(common.ActiveTimeout)
@@ -72,6 +97,7 @@ func main() {
 	signal.Notify(sigQ, os.Interrupt, syscall.SIGTERM)
 
 	nx.Start()
+	go srv.Run()
 
 	for {
 		select {

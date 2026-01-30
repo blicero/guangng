@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-27 16:44:13 krylon>
+// Time-stamp: <2026-01-30 14:45:03 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -47,6 +47,7 @@ const (
 	BufSize                  = 65536
 	LiveTimeout              = time.Minute * 5
 	ActiveTimeout            = time.Second * 5
+	WebPort                  = 8919
 )
 
 // LogLevels are the names of the log levels supported by the logger.
