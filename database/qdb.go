@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 14:20:56 krylon>
+// Time-stamp: <2026-01-30 17:31:08 krylon>
 
 package database
 
@@ -103,6 +103,7 @@ WHERE end IS NULL
 ORDER BY added
 LIMIT ?
 `,
+	query.XFRGetCnt: "SELECT COUNT(id) FROM xfr",
 	query.XFRStart:  "UPDATE xfr SET start = ? WHERE id = ?",
 	query.XFRFinish: "UPDATE xfr SET end = ?, status = ? WHERE id = ?",
 	query.ServiceAdd: `
@@ -119,5 +120,10 @@ SELECT
     timestamp
 FROM svc
 WHERE host_id = ?
+`,
+	query.ServiceGetCnt: `
+SELECT COUNT(id)
+FROM svc
+WHERE response IS NOT NULL
 `,
 }

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-23 18:24:30 krylon>
+// Time-stamp: <2026-01-30 17:28:29 krylon>
 
 package database
 
@@ -144,3 +144,48 @@ EXEC_QUERY:
 
 	return ports, nil
 } // func (db *Database) ServiceGetByHost(h *model.Host) (map[uint16]*model.Service, error)
+
+// ServiceGetCnt returns the total number of scanned ports.
+func (db *Database) ServiceGetCnt() (int64, error) {
+	const qid query.ID = query.ServiceGetCnt
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return -1, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return -1, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var cnt int64
+		if err = rows.Scan(&cnt); err != nil {
+			var ex = fmt.Errorf("failed to scan row: %w", err)
+			db.log.Printf("[ERROR] %s\n", ex.Error())
+			return -1, nil
+		}
+
+		return cnt, nil
+	}
+
+	return -1, nil
+} // func (db *Database) ServiceGetCnt() (int64, error)

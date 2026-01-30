@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-21 18:59:20 krylon>
+// Time-stamp: <2026-01-30 17:26:39 krylon>
 
 package database
 
@@ -186,6 +186,51 @@ EXEC_QUERY:
 
 	return xlist, nil
 } // func (db *Database) XFRGetUnfinished(lim int) ([]*model.Zone, error)
+
+// XFRGetCnt returns the total number of XFRs in the Database.
+func (db *Database) XFRGetCnt() (int64, error) {
+	const qid query.ID = query.XFRGetCnt
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return -1, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return -1, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var cnt int64
+		if err = rows.Scan(&cnt); err != nil {
+			var ex = fmt.Errorf("failed to scan row: %w", err)
+			db.log.Printf("[ERROR] %s\n", ex.Error())
+			return -1, nil
+		}
+
+		return cnt, nil
+	}
+
+	return -1, nil
+} // func (db *Database) XFRGetCnt() (int64, error)
 
 // XFRStart registers the beginning of an attempt to do a transfer of a DNS zone.
 func (db *Database) XFRStart(zone *model.Zone) error {
