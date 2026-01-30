@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 20:01:24 krylon>
+// Time-stamp: <2026-01-30 14:22:22 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -24,7 +24,7 @@ type tmplDataIndex struct { // nolint: unused,deadcode
 	GenNameCnt int
 	XFRCnt     int
 	ScanCnt    int
-	HostCnt    int
+	HostCnt    int64
 }
 
 // type tmplDataNetworkAll struct { // nolint: unused,deadcode

@@ -1,5 +1,5 @@
 {{ define "head" }}
-{{/* Time-stamp: <2026-01-26 17:43:41 krylon> */}}
+{{/* Time-stamp: <2026-01-30 15:17:13 krylon> */}}
 <head>
   <title>{{ app_string }}@{{ hostname  }} - {{ .Title }}</title>
   
@@ -23,26 +23,6 @@
      // weird errors when I called it right away.
      // window.setTimeout(getNewMessages, 1000);
 
-
-     curMessageCnt = {{ len .Messages }};
-     if (curMessageCnt == 0) {
-       $("#msg_tbl").hide();
-     }
-
-     {{ if .TestMsgGen }}
-     try {
-       $("#msg_check_switch")[0].checked = settings.messages.queryEnabled;
-     } catch (err) {
-       console.log(err);
-       // alert(err);
-     }
-     {{ else }}
-     window.setTimeout(function() { settings.messages.queryEnabled = true; }, 250);
-     {{ end }}
-
-     if (settings.items.hideboring) {
-       hide_boring_items();
-     }
    });
   </script>
 

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 20:01:30 krylon>
+// Time-stamp: <2026-01-30 15:13:02 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -24,6 +24,7 @@ import (
 	"github.com/blicero/guangng/common"
 	"github.com/blicero/guangng/database"
 	"github.com/blicero/guangng/logdomain"
+	"github.com/blicero/guangng/model/subsystem"
 	"github.com/blicero/guangng/nexus"
 	"github.com/gorilla/mux"
 )
@@ -48,7 +49,7 @@ type Server struct {
 	tmpl      *template.Template
 	web       http.Server
 	mimeTypes map[string]string
-	nx        *nexus.Nexus // nolint: unused
+	nx        *nexus.Nexus
 }
 
 // Create returns a new web Server.
@@ -58,6 +59,7 @@ func Create(addr string, nx *nexus.Nexus) (*Server, error) {
 		msg string
 		srv = &Server{
 			addr: addr,
+			nx:   nx,
 			mimeTypes: map[string]string{
 				".css":  "text/css",
 				".map":  "application/json",
@@ -75,9 +77,12 @@ func Create(addr string, nx *nexus.Nexus) (*Server, error) {
 
 	if srv.log, err = common.GetLogger(logdomain.Web); err != nil {
 		return nil, err
+	} else if srv.pool, err = database.NewPool(4); err != nil {
+		srv.log.Printf("[CRITICAL] Cannot open database pool: %s\n",
+			err.Error())
+		return nil, err
 	}
 
-	// ...
 	var templates []fs.DirEntry
 	var tmplRe = regexp.MustCompile("[.]tmpl$")
 
@@ -122,6 +127,7 @@ func Create(addr string, nx *nexus.Nexus) (*Server, error) {
 	// Register URL handlers
 	srv.router.HandleFunc("/favicon.ico", srv.handleFavIco)
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
+	srv.router.HandleFunc("/{index:(?i:index|main|start)$}", srv.handleMain)
 
 	return srv, nil
 } // func Create(addr string, nx *nexus.Nexus) (*Server, error)
@@ -135,6 +141,29 @@ func (srv *Server) IsActive() bool {
 func (srv *Server) Stop() {
 	srv.active.Store(false)
 } // func (srv *Server) Stop()
+
+// Run executes the Server's loop, waiting for new connections and starting
+// goroutines to handle them.
+func (srv *Server) Run() {
+	var err error
+
+	defer srv.log.Println("[INFO] Web server is shutting down")
+
+	srv.active.Store(true)
+	defer srv.active.Store(false)
+
+	srv.log.Printf("[INFO] Web frontend is going online at %s\n", srv.addr)
+	http.Handle("/", srv.router)
+
+	if err = srv.web.ListenAndServe(); err != nil {
+		if err.Error() != "http: Server closed" {
+			srv.log.Printf("[ERROR] ListenAndServe returned an error: %s\n",
+				err.Error())
+		} else {
+			srv.log.Println("[INFO] HTTP Server has shut down.")
+		}
+	}
+} // func (srv *Server) Run()
 
 //////////////////////////////////////////////////////////////////////////////
 /// Handle requests //////////////////////////////////////////////////////////
@@ -157,6 +186,13 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 				Debug: common.Debug,
 				URL:   req.URL.String(),
 			},
+			GenActive:  srv.nx.GetActiveFlag(subsystem.Generator),
+			XFRActive:  srv.nx.GetActiveFlag(subsystem.XFR),
+			ScanActive: srv.nx.GetActiveFlag(subsystem.Scanner),
+			GenAddrCnt: srv.nx.GetWorkerCount(subsystem.GeneratorAddress),
+			GenNameCnt: srv.nx.GetWorkerCount(subsystem.GeneratorName),
+			XFRCnt:     srv.nx.GetWorkerCount(subsystem.XFR),
+			ScanCnt:    srv.nx.GetWorkerCount(subsystem.Scanner),
 		}
 	)
 
@@ -170,6 +206,19 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
+	if data.HostCnt, err = db.HostGetCnt(); err != nil {
+		srv.log.Printf("[ERROR] Failed to get number of Hosts from Database: %s\n",
+			err.Error())
+	}
+
+	w.Header().Set("Cache-Control", cacheControl)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		// srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
 } // func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request)
 
 //////////////////////////////////////////////////////////////////////////////
