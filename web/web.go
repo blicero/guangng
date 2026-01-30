@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 15:13:02 krylon>
+// Time-stamp: <2026-01-30 17:35:09 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -208,6 +208,12 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 
 	if data.HostCnt, err = db.HostGetCnt(); err != nil {
 		srv.log.Printf("[ERROR] Failed to get number of Hosts from Database: %s\n",
+			err.Error())
+	} else if data.ZoneCnt, err = db.XFRGetCnt(); err != nil {
+		srv.log.Printf("[ERROR] Failed to get number of zone transfers from Database: %s\n",
+			err.Error())
+	} else if data.PortCnt, err = db.ServiceGetCnt(); err != nil {
+		srv.log.Printf("[ERROR] Failed to get number of scanned ports from Database: %s\n",
 			err.Error())
 	}
 

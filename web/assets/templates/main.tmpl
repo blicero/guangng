@@ -1,6 +1,6 @@
 {{ define "main" }}
 {{/* Created on 10. 06. 2024 */}}
-{{/* Time-stamp: <2026-01-28 16:10:33 krylon> */}}
+{{/* Time-stamp: <2026-01-30 17:38:55 krylon> */}}
 <!DOCTYPE html>
 <html>
     {{ template "head" . }}
@@ -8,42 +8,74 @@
     <body>
         {{ template "intro" . }}
 
-        <big>Soon to come: <b>Content</b>!!!</big>
-
         <h2>Overview</h2>
 
-        <table class="tbl tbl-striped">
-            <thead>
-                <tr>
-                    <th>Subsystem</th>
-                    <th>Active?</th>
-                    <th># Workers</th>
-                </tr>
-            </thead>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <table class="tbl tbl-striped overview">
+                        <caption>Subsystems</caption>
+                        <thead>
+                            <tr>
+                                <th>Subsystem</th>
+                                <th>Active?</th>
+                                <th># Workers</th>
+                            </tr>
+                        </thead>
 
-            <tbody>
-                <tr>
-                    <td>Address Generator</td>
-                    <td>{{ .GenActive }}</td>
-                    <td>{{ .GenAddrCnt }}</td>
-                </tr>
-                <tr>
-                    <td>Name Resolver</td>
-                    <td>{{ .GenActive }}</td>
-                    <td>{{ .GenNameCnt }}</td>
-                </tr>
-                <tr>
-                    <td>XFR</td>
-                    <td>{{ .XFRActive }}</td>
-                    <td>{{ .XFRCnt }}</td>
-                </tr>
-                <tr>
-                    <td>Port Scanner</td>
-                    <td>{{ .ScanActive }}</td>
-                    <td>{{ .ScanCnt }}</td>
-                </tr>
-            </tbody>
-        </table>
+                        <tbody>
+                            <tr>
+                                <td>Address Generator</td>
+                                <td>{{ .GenActive }}</td>
+                                <td>{{ .GenAddrCnt }}</td>
+                            </tr>
+                            <tr>
+                                <td>Name Resolver</td>
+                                <td>{{ .GenActive }}</td>
+                                <td>{{ .GenNameCnt }}</td>
+                            </tr>
+                            <tr>
+                                <td>XFR</td>
+                                <td>{{ .XFRActive }}</td>
+                                <td>{{ .XFRCnt }}</td>
+                            </tr>
+                            <tr>
+                                <td>Port Scanner</td>
+                                <td>{{ .ScanActive }}</td>
+                                <td>{{ .ScanCnt }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col">
+                    <table class="tbl tbl-striped overview">
+                        <caption>Database</caption>
+                        <thead>
+                            <tr>
+                                <th>Table</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr>
+                                <td>Hosts</td>
+                                <td>{{ .HostCnt }}</td>
+                            </tr>
+                            <tr>
+                                <td>XFRs</td>
+                                <td>{{ .ZoneCnt }}</td>
+                            </tr>
+                            <tr>
+                                <td>Ports</td>
+                                <td>{{ .PortCnt }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
         {{ template "footer" . }}
     </body>
