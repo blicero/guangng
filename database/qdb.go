@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-23 18:07:39 krylon>
+// Time-stamp: <2026-01-30 14:20:56 krylon>
 
 package database
 
@@ -63,6 +63,9 @@ SELECT id,
 FROM host
 LIMIT ?
 OFFSET ABS(RANDOM()) % MAX((SELECT COUNT(*) FROM host), 1)
+`,
+	query.HostGetCnt: `
+SELECT COUNT(id) FROM host
 `,
 	query.HostUpdateSysname: `
 UPDATE host
