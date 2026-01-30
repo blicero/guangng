@@ -1,0 +1,52 @@
+{{ define "by_port" }}
+{{/* Created on 30. 01. 2026 */}}
+{{/* Time-stamp: <2026-01-30 19:10:26 krylon> */}}
+<html>
+    {{ template "head" . }}
+
+    <body>
+        <h1>{{.Title}}</h1>
+        <hr />
+
+        {{if (gt (len .Error) 0)}}
+        <div class="error">
+            {{range .Error}}
+            {{.}}<br />
+            {{end}}
+        </div>
+        {{end}}
+
+        {{ template "beacon" . }}
+
+        <p>&nbsp;</p>
+
+        {{ template "menu" }}
+
+        <script src="/static/update.js"></script>
+
+        <script>
+         function toggle_port_visibility(n, do_hide) {
+                 const containerID = `#content_port_${n}`
+                 if (do_hide) {
+                         $(containerID).hide()
+                 } else {
+                         $(containerID).show()
+                 }
+         }
+
+         $(document).ready(() => {
+                 console.log('Initialize page elements...')
+                 $('.filter_checkbox').each(() => {
+                         $(this).checked = false
+                 })
+                 $('.port_results').show()
+                 $('#toggle_update')[0].checked = settings.update.active
+                 $('#update_interval_edit')[0].value = settings.update.interval / 1000
+                 window.setTimeout(update_results, settings.update.interval)
+         })
+        </script>
+
+        {{ template "controlpanel" . }}
+    </body>
+</html>
+{{ end }}

@@ -1,8 +1,8 @@
-// /home/krylon/go/src/carebear/web/helpers.go
+// /home/krylon/go/src/guangng/web/helpers.go
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2026-01-26 16:44:47 krylon>
+// Time-stamp: <2026-01-30 19:14:03 krylon>
 
 package web
 
@@ -33,6 +33,7 @@ var funcmap = template.FuncMap{
 	"now":              nowFunc,
 	"app_string":       appStringFunc,
 	"app_build":        appBuildFunc,
+	"app_name":         appNameFunc,
 	"hostname":         hostname,
 	"fmt_bytes":        formatBytes,
 	"fmt_time":         formatTime,
@@ -132,6 +133,10 @@ func appStringFunc() string {
 func appBuildFunc() string {
 	return common.BuildStamp.Format("2006-01-02 15:04:05 MST")
 } // func appBuildFunc() string
+
+func appNameFunc() string {
+	return common.AppName
+} // func appNameFunc() string
 
 func formatBytes(n int64) string {
 	if n < 0 {
