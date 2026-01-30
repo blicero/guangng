@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-29 18:13:57 krylon>
+// Time-stamp: <2026-01-30 14:15:55 krylon>
 
 package generator
 
@@ -162,6 +162,16 @@ func (gen *Generator) IsActive() bool {
 func (gen *Generator) WorkerCount() int {
 	return gen.iCnt + gen.nCnt
 } // func (gen *Generator) WorkerCount() int
+
+// AddrWorkerCount returns the number of address generator workers.
+func (gen *Generator) AddrWorkerCount() int {
+	return gen.iCnt
+} // func (gen *Generator) AddrWorkerCount() int
+
+// NameWorkerCount return the number name resolver workers.
+func (gen *Generator) NameWorkerCount() int {
+	return gen.nCnt
+} // func (gen *Generator) NameWorkerCount() int
 
 func (gen *Generator) System() subsystem.ID {
 	return subsystem.Generator
