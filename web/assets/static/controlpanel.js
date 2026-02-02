@@ -1,6 +1,6 @@
 // /home/krylon/go/src/github.com/blicero/guang/frontend/html/static/controlpanel.js
 // -*- mode: javascript; coding: utf-8; -*-
-// Time-stamp: <2026-01-31 13:22:29 krylon>
+// Time-stamp: <2026-02-02 20:30:25 krylon>
 // Copyright 2022 Benjamin Walkenhorst
 
 'use strict'
@@ -11,6 +11,10 @@ var count = {
     'Scanner': 0,
     'XFR':     0,
 }
+
+// const facilities = {
+//     'GenAddr': 
+// }
 
 const cntID = {
     'GenAddr': '#cnt_gen_addr',

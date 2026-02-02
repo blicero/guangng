@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 16:56:55 krylon>
+// Time-stamp: <2026-02-02 20:13:28 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -136,6 +136,9 @@ func Create(addr string, nx *nexus.Nexus) (*Server, error) {
 	srv.router.HandleFunc(
 		"/ajax/spawn_worker/{subsys:(?:\\d+)}/{cnt:(?:\\d+)$}",
 		srv.handleSpawnWorker)
+	srv.router.HandleFunc(
+		"/ajax/stop_worker/{subsys:(?:\\d+)}/{cnt:(?:\\d+)$}",
+		srv.handleStopWorker)
 
 	return srv, nil
 } // func Create(addr string, nx *nexus.Nexus) (*Server, error)
@@ -279,6 +282,12 @@ func (srv *Server) handleSpawnWorker(w http.ResponseWriter, r *http.Request) {
 		cnt,
 		fac)
 
+	for range cnt {
+		srv.nx.StartOne(fac)
+	}
+	res.Status = true
+	res.Message = fmt.Sprintf("Started one worker in %s", fac)
+
 RESPOND:
 	var outbuf []byte
 
@@ -295,6 +304,69 @@ RESPOND:
 	w.WriteHeader(200)
 	w.Write(outbuf) // nolint: errcheck
 } // func handleSpawnWorker(w http.ResponseWriter, req *http.Request)
+
+func (srv *Server) handleStopWorker(w http.ResponseWriter, r *http.Request) {
+	var (
+		err            error
+		facStr, cntStr string
+		cnt, facID     int64
+		fac            subsystem.ID
+		res            = ajaxCtlResponse{
+			ajaxData: ajaxData{
+				Timestamp: time.Now(),
+			},
+		}
+	)
+
+	srv.log.Printf("[TRACE] Handling request for %s\n", r.RequestURI)
+
+	vars := mux.Vars(r)
+
+	facStr = vars["subsys"]
+	cntStr = vars["cnt"]
+
+	if cnt, err = strconv.ParseInt(cntStr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse number of workers to spawn (%q): %s",
+			cntStr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		goto RESPOND
+	} else if facID, err = strconv.ParseInt(facStr, 10, 8); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse facility ID %q: %s",
+			facStr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		goto RESPOND
+	}
+
+	fac = subsystem.ID(facID)
+
+	srv.log.Printf("[DEBUG] Stop %d %s workers.\n",
+		cnt,
+		fac)
+
+	for range cnt {
+		srv.nx.StopOne(fac)
+	}
+	res.Status = true
+	res.Message = fmt.Sprintf("Started one worker in %s", fac)
+
+RESPOND:
+	var outbuf []byte
+
+	if outbuf, err = json.Marshal(&res); err != nil {
+		res.Message = fmt.Sprintf("Error serializing Response to %s: %s",
+			r.RemoteAddr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+	}
+
+	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(outbuf)), 10))
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", cacheControl)
+	w.WriteHeader(200)
+	w.Write(outbuf) // nolint: errcheck
+} // func (srv *Server) handleStopWorker(w http.ResponseWriter, r *http.Request)
 
 //////////////////////////////////////////////////////////////////////////////
 /// Handle static assets /////////////////////////////////////////////////////
