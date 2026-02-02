@@ -2,14 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 16. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 17:50:39 krylon>
+// Time-stamp: <2026-02-02 19:56:26 krylon>
 
 package nexus
 
 import (
 	"fmt"
 	"log"
-	"sync"
 	"sync/atomic"
 
 	"github.com/blicero/guangng/common"
@@ -23,7 +22,6 @@ import (
 // Nexus coordinates the various subsystems.
 type Nexus struct {
 	log    *log.Logger
-	lock   sync.RWMutex
 	active atomic.Bool
 	gen    *generator.Generator
 	xfr    *xfr.XFR
@@ -79,6 +77,7 @@ func (nx *Nexus) Stop() {
 	nx.scn.Stop()
 } // func (nx *Nexus) Stop()
 
+// StartOne starts an additional worker in one subsystem.
 func (nx *Nexus) StartOne(s subsystem.ID) {
 	nx.log.Printf("[TRACE] Tell %s to spawn another worker\n",
 		s)
@@ -101,6 +100,7 @@ func (nx *Nexus) StartOne(s subsystem.ID) {
 	}
 } // func (nx *Nexus) StartOne(s subsystem.ID)
 
+// StopOne stops a worker in one subsystem.
 func (nx *Nexus) StopOne(s subsystem.ID) {
 	nx.log.Printf("[TRACE] Tell %s to stop a worker\n",
 		s)
