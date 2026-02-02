@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-02 17:47:34 krylon>
+# Time-stamp: <2026-02-02 20:44:55 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -8,19 +8,19 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* GuangNG [9/11]
+* GuangNG [13/16]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-02 Mo 17:47]
+   #+CAPTION: Clock summary at [2026-02-02 Mo 20:44]
    | Headline                                      | Time      |            |      |      |
    |-----------------------------------------------+-----------+------------+------+------|
-   | *Total time*                                  | *2d 0:59* |            |      |      |
+   | *Total time*                                  | *2d 1:49* |            |      |      |
    |-----------------------------------------------+-----------+------------+------+------|
-   | *GuangNG [9/11]*                              | *2d 0:59* |            |      |      |
+   | *GuangNG [13/16]*                             | *2d 1:49* |            |      |      |
    | \_  /Components [3/4]/                        |           | /1d 21:17/ |      |      |
    | \_    Main [0/0]                              |           |            | 0:15 |      |
    | \_    Model [0/0]                             |           |            | 1:37 |      |
@@ -35,12 +35,13 @@
    | \_    Nexus [1/1]                             |           |            | 6:24 |      |
    | \_      Introspection                         |           |            |      | 4:38 |
    | \_    Web UI [0/0]                            |           |            | 5:44 |      |
-   | \_  /Features [4/5]/                          |           | /3:03/     |      |      |
+   | \_  /Features [7/9]/                          |           | /3:53/     |      |      |
    | \_    Allow starting subsystems with zero...  |           |            | 0:43 |      |
    | \_      Generator                             |           |            |      | 0:18 |
    | \_      XFR                                   |           |            |      | 0:07 |
    | \_      Scanner                               |           |            |      | 0:14 |
-   | \_    Control starting/stopping subsystems... |           |            | 2:20 |      |
+   | \_    Control starting/stopping subsystems... |           |            | 3:10 |      |
+   | \_      Web                                   |           |            |      | 0:50 |
    | \_  /Bugs [2/3]/                              |           | /0:39/     |      |      |
    | \_    Query XFRAdd did not return a value     |           |            | 0:13 |      |
    | \_    Segmentation Violation Blues            |           |            | 0:26 |      |
@@ -185,7 +186,7 @@
     Now that the core is sorta-kinda working, I need a UI to watch the engine
     running and inspect the Hosts and Services it gathers.
     As before, a web interface seems a natural choice. So let's go.
-** Features [4/5]                                                   :feature:
+** Features [7/9]                                                   :feature:
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -214,7 +215,7 @@
      :LOGBOOK:
      CLOCK: [2026-01-26 Mo 15:08]--[2026-01-26 Mo 15:22] =>  0:14
      :END:
-*** TODO Control starting/stopping subsystems [0/3]            :internals:ui:
+*** TODO Control starting/stopping subsystems [3/4]            :internals:ui:
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY:
@@ -223,8 +224,15 @@
     CLOCK: [2026-02-02 Mo 15:27]--[2026-02-02 Mo 17:47] =>  2:20
     :END:
 **** TODO Web
-**** TODO Nexus
-**** TODO Scanner
+     :LOGBOOK:
+     CLOCK: [2026-02-02 Mo 19:54]--[2026-02-02 Mo 20:44] =>  0:50
+     :END:
+**** DONE Nexus
+     CLOSED: [2026-02-02 Mo 19:49]
+**** DONE Scanner
+     CLOSED: [2026-02-02 Mo 19:49]
+**** DONE Generator
+     CLOSED: [2026-02-02 Mo 19:52]
 ** Bugs [2/3]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
