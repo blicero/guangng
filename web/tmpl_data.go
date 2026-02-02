@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 17:33:23 krylon>
+// Time-stamp: <2026-01-31 12:52:24 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -28,6 +28,11 @@ type tmplDataIndex struct { // nolint: unused,deadcode
 	ZoneCnt    int64
 	PortCnt    int64
 }
+
+// HostGenCnt returns the total number of workers in the Generator subsystem.
+func (d *tmplDataIndex) HostGenCnt() int {
+	return d.GenAddrCnt + d.GenNameCnt
+} // func (d *tmplDataIndex) HostGenCnt() int
 
 // type tmplDataNetworkAll struct { // nolint: unused,deadcode
 // 	tmplDataBase

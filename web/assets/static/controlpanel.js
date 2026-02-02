@@ -1,26 +1,29 @@
 // /home/krylon/go/src/github.com/blicero/guang/frontend/html/static/controlpanel.js
 // -*- mode: javascript; coding: utf-8; -*-
-// Time-stamp: <2023-01-10 20:14:53 krylon>
+// Time-stamp: <2026-01-31 13:22:29 krylon>
 // Copyright 2022 Benjamin Walkenhorst
 
 'use strict'
 
 var count = {
-    'Generator': 0,
+    'GenAddr': 0,
+    'GenName': 0,
     'Scanner': 0,
-    'XFR': 0,
+    'XFR':     0,
 }
 
 const cntID = {
-    'Generator': '#cnt_gen',
+    'GenAddr': '#cnt_gen_addr',
+    'GenName': '#cnt_gen_name',
     'Scanner': '#cnt_scan',
-    'XFR': '#cnt_xfr',
+    'XFR':     '#cnt_xfr',
 }
 
 const amtID = {
-    'Generator': '#amt_gen',
-    'Scanner': '#amt_scan',
-    'XFR': '#amt_xfr',
+    'GenAddr':   '#amt_gen_addr',
+    'GenName':   '#amt_gen_name',
+    'Scanner':   '#amt_scan',
+    'XFR':       '#amt_xfr',
 }
 
 function workerSpawn(fac) {
