@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 16. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 14:17:20 krylon>
+// Time-stamp: <2026-02-02 17:50:39 krylon>
 
 package nexus
 
@@ -78,6 +78,50 @@ func (nx *Nexus) Stop() {
 	nx.xfr.Stop()
 	nx.scn.Stop()
 } // func (nx *Nexus) Stop()
+
+func (nx *Nexus) StartOne(s subsystem.ID) {
+	nx.log.Printf("[TRACE] Tell %s to spawn another worker\n",
+		s)
+
+	switch s {
+	case subsystem.GeneratorAddress:
+		nx.gen.StartAddrWorker()
+	case subsystem.GeneratorName:
+		nx.gen.StartNameWorker()
+	case subsystem.Generator:
+		nx.gen.StartAddrWorker()
+		nx.gen.StartNameWorker()
+	case subsystem.XFR:
+		nx.xfr.StartOne()
+	case subsystem.Scanner:
+		nx.xfr.StopOne()
+	default:
+		nx.log.Printf("[ERROR] Don't how to start a %s worker\n",
+			s)
+	}
+} // func (nx *Nexus) StartOne(s subsystem.ID)
+
+func (nx *Nexus) StopOne(s subsystem.ID) {
+	nx.log.Printf("[TRACE] Tell %s to stop a worker\n",
+		s)
+
+	switch s {
+	case subsystem.GeneratorAddress:
+		nx.gen.StopAddrWorker()
+	case subsystem.GeneratorName:
+		nx.gen.StopNameWorker()
+	case subsystem.Generator:
+		nx.gen.StopAddrWorker()
+		nx.gen.StopNameWorker()
+	case subsystem.XFR:
+		nx.xfr.StopOne()
+	case subsystem.Scanner:
+		nx.xfr.StopOne()
+	default:
+		nx.log.Printf("[ERROR] Don't how to stop a %s worker\n",
+			s)
+	}
+} // func (nx *Nexus) StopOne(s subsystem.ID)
 
 // GetActiveFlag returns the active flag of the specified subsystem.
 func (nx *Nexus) GetActiveFlag(sub subsystem.ID) bool {

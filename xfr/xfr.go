@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-28 17:52:01 krylon>
+// Time-stamp: <2026-02-02 16:44:38 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -31,16 +31,17 @@ import (
 
 // XFR attempts to perform zone transfers.
 type XFR struct {
-	log    *log.Logger
-	active atomic.Bool
-	xcnt   atomic.Int32
-	cmdQ   chan bool
-	xfrQ   chan *model.Zone
-	hostQ  chan *model.Host
-	res    *dns.Client
-	pool   *database.Pool
-	blName *blacklist.BlacklistName
-	blAddr *blacklist.BlacklistAddr
+	log       *log.Logger
+	active    atomic.Bool
+	xcnt      atomic.Int32
+	idCounter atomic.Int64
+	cmdQ      chan bool
+	xfrQ      chan *model.Zone
+	hostQ     chan *model.Host
+	res       *dns.Client
+	pool      *database.Pool
+	blName    *blacklist.BlacklistName
+	blAddr    *blacklist.BlacklistAddr
 }
 
 // New returns a new XFR instance.
@@ -72,6 +73,11 @@ func New(cnt int) (*XFR, error) {
 	return x, nil
 } // func New(cnt int) (*XFR, error)
 
+func (x *XFR) getID() int {
+	var val = x.idCounter.Add(1)
+	return int(val)
+} // func (x *XFR) getID() int
+
 // IsActive returns the XFR engine's active flag.
 func (x *XFR) IsActive() bool {
 	return x.active.Load()
@@ -85,8 +91,8 @@ func (x *XFR) Start() {
 	go x.hostWorker()
 	go x.xfrFeeder()
 
-	for i := range x.xcnt.Load() {
-		go x.xfrWorker(int(i + 1))
+	for range x.xcnt.Load() {
+		go x.xfrWorker(x.getID())
 	}
 } // func (x *XFR) Start()
 
@@ -94,6 +100,16 @@ func (x *XFR) Start() {
 func (x *XFR) Stop() {
 	x.active.Store(false)
 } // func (x *XFR) Stop()
+
+// StartOne starts an additional worker.
+func (x *XFR) StartOne() {
+	go x.xfrWorker(x.getID())
+} // func (x *XFR) StartOne()
+
+// StopOne stops one worker.
+func (x *XFR) StopOne() {
+	x.cmdQ <- true
+} // func (x *XFR) StopOne()
 
 func (x *XFR) WorkerCount() int {
 	return int(x.xcnt.Load())

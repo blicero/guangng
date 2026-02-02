@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-29 18:15:39 krylon>
+// Time-stamp: <2026-02-02 16:46:30 krylon>
 
 // Package scanner implements scanning ports. Duh.
 package scanner
@@ -70,7 +70,7 @@ type Scanner struct {
 	log     *log.Logger
 	scnt    atomic.Int32
 	goalCnt atomic.Int32
-	idCnt   int
+	idCnt   atomic.Int64
 	active  atomic.Bool
 	pool    *database.Pool
 	hostQ   chan scanProposal
@@ -102,6 +102,11 @@ func New(cnt int) (*Scanner, error) {
 	return scn, nil
 } // func New(cnt int) (*Scanner, error)
 
+func (scn *Scanner) getID() int {
+	var val = scn.idCnt.Add(1)
+	return int(val)
+} // func (gen *Generator) getID() int
+
 // WorkerCnt returns the number of active workers.
 func (scn *Scanner) WorkerCnt() int {
 	return int(scn.scnt.Load())
@@ -124,9 +129,7 @@ func (scn *Scanner) Start() {
 	go scn.collector()
 
 	for range scn.goalCnt.Load() {
-		scn.idCnt++
-		go scn.scanWorker(scn.idCnt)
-
+		go scn.scanWorker(scn.getID())
 	}
 } // func (scn *Scanner) Start()
 
@@ -137,6 +140,7 @@ func (scn *Scanner) Stop() {
 
 // StartOne starts one additional worker.
 func (scn *Scanner) StartOne() {
+	go scn.scanWorker(scn.getID())
 } // func (scn *Scanner) StartOne()
 
 // StopOne tells one worker to stop.

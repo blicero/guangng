@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 14:15:55 krylon>
+// Time-stamp: <2026-02-02 15:37:34 krylon>
 
 package generator
 
@@ -12,6 +12,7 @@ import (
 	"net"
 	"regexp"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -84,12 +85,14 @@ func (c *cache) check(addr net.IP) (bool, error) {
 // generated Host is likely to exist on the Internet).
 type Generator struct {
 	log        *log.Logger
+	lock       sync.RWMutex
 	cache      *cache
 	blAddr     *blacklist.BlacklistAddr
 	blName     *blacklist.BlacklistName
 	ipQ        chan net.IP
 	hostQ      chan *model.Host
 	active     atomic.Bool
+	idCounter  atomic.Int64
 	iCnt, nCnt int
 	ctlQAddr   chan bool
 	ctlQName   chan bool
@@ -138,21 +141,47 @@ func New(icnt, ncnt int) (*Generator, error) {
 func (gen *Generator) Start() {
 	gen.active.Store(true)
 
-	for i := range gen.iCnt {
-		go gen.addrWorker(i)
+	for range gen.iCnt {
+		go gen.addrWorker(gen.getID())
 	}
 
-	for i := range gen.nCnt {
-		go gen.nameWorker(i)
+	for range gen.nCnt {
+		go gen.nameWorker(gen.getID())
 	}
 
 	go gen.hostWorker()
 } // func (gen *Generator) Start()
 
+func (gen *Generator) getID() int {
+	var val = gen.idCounter.Add(1)
+	return int(val)
+} // func (gen *Generator) getID() int
+
+// StartAddrworker stars another address generation worker.
+func (gen *Generator) StartAddrWorker() {
+	go gen.addrWorker(gen.getID())
+} // func (gen *Generator) StartAddrWorker()
+
+// StartNameworker starts another name resolution worker.
+func (gen *Generator) StartNameWorker() {
+	var id = gen.getID()
+	go gen.nameWorker(id)
+} // func (gen *Generator) StartNameWorker()
+
 // Stop clears the Generator's active flag.
 func (gen *Generator) Stop() {
 	gen.active.Store(false)
 } // func (gen *Generator) Stop()
+
+// StopAddrWorker stops one address generation worker.
+func (gen *Generator) StopAddrWorker() {
+	gen.ctlQAddr <- true
+} // func (gen *Generator) StopAddrWorker()
+
+// StopNameWorker stops one name resolution worker.
+func (gen *Generator) StopNameWorker() {
+	gen.ctlQName <- true
+} // func (gen *Generator) StopNameWorker()
 
 // IsActive returns the Generator's active flag.
 func (gen *Generator) IsActive() bool {
@@ -165,6 +194,8 @@ func (gen *Generator) WorkerCount() int {
 
 // AddrWorkerCount returns the number of address generator workers.
 func (gen *Generator) AddrWorkerCount() int {
+	gen.lock.RLock()
+	defer gen.lock.RUnlock()
 	return gen.iCnt
 } // func (gen *Generator) AddrWorkerCount() int
 
