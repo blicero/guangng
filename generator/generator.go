@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-03 15:59:13 krylon>
+// Time-stamp: <2026-02-03 16:47:28 krylon>
 
 package generator
 
@@ -84,18 +84,19 @@ func (c *cache) check(addr net.IP) (bool, error) {
 // and ensuring that the IP address resolves to a valid PTR (i.e. that the
 // generated Host is likely to exist on the Internet).
 type Generator struct {
-	log        *log.Logger
-	lock       sync.RWMutex
-	cache      *cache
-	blAddr     *blacklist.BlacklistAddr
-	blName     *blacklist.BlacklistName
-	ipQ        chan net.IP
-	hostQ      chan *model.Host
-	active     atomic.Bool
-	idCounter  atomic.Int64
-	iCnt, nCnt int
-	ctlQAddr   chan bool
-	ctlQName   chan bool
+	log                      *log.Logger
+	lock                     sync.RWMutex
+	cache                    *cache
+	blAddr                   *blacklist.BlacklistAddr
+	blName                   *blacklist.BlacklistName
+	ipQ                      chan net.IP
+	hostQ                    chan *model.Host
+	active                   atomic.Bool
+	idCounter                atomic.Int64
+	addrGenCnt, nameGenCnt   atomic.Int64
+	addrGenGoal, nameGenGoal atomic.Int64
+	ctlQAddr                 chan bool
+	ctlQName                 chan bool
 }
 
 // New creates a new Generator.
@@ -105,14 +106,17 @@ func New(icnt, ncnt int) (*Generator, error) {
 	var (
 		err error
 		gen = &Generator{
-			iCnt: icnt,
-			nCnt: ncnt,
+			// iCnt: icnt,
+			// nCnt: ncnt,
 		}
 	)
 
 	if (icnt == 0) != (ncnt == 0) {
 		panic("Worker counts must both be non-zero or both be zero")
 	}
+
+	gen.addrGenGoal.Store(int64(icnt))
+	gen.nameGenGoal.Store(int64(ncnt))
 
 	if gen.log, err = common.GetLogger(logdomain.Generator); err != nil {
 		return nil, err
@@ -124,8 +128,8 @@ func New(icnt, ncnt int) (*Generator, error) {
 
 	var aqcnt, nqcnt int
 
-	aqcnt = max(gen.iCnt, 2)
-	nqcnt = max(gen.nCnt, 2)
+	aqcnt = max(icnt, 2)
+	nqcnt = max(ncnt, 2)
 
 	gen.blAddr = blacklist.NewBlacklistAddr()
 	gen.blName = blacklist.NewBlacklistName()
@@ -141,11 +145,11 @@ func New(icnt, ncnt int) (*Generator, error) {
 func (gen *Generator) Start() {
 	gen.active.Store(true)
 
-	for range gen.iCnt {
+	for range gen.addrGenGoal.Load() {
 		go gen.addrWorker(gen.getID())
 	}
 
-	for range gen.nCnt {
+	for range gen.nameGenGoal.Load() {
 		go gen.nameWorker(gen.getID())
 	}
 
@@ -159,21 +163,8 @@ func (gen *Generator) getID() int {
 
 // StartAddrworker stars another address generation worker.
 func (gen *Generator) StartAddrWorker() {
-	gen.lock.RLock()
-	var acnt = gen.iCnt
-	gen.lock.RUnlock()
-
 	gen.log.Println("[DEBUG] Start one address worker...")
-
 	go gen.addrWorker(gen.getID())
-
-	gen.lock.RLock()
-	var bcnt = gen.iCnt
-	gen.lock.RUnlock()
-
-	gen.log.Printf("[DEBUG] Address worker count before = %d, after = %d\n",
-		acnt,
-		bcnt)
 } // func (gen *Generator) StartAddrWorker()
 
 // StartNameworker starts another name resolution worker.
@@ -203,19 +194,17 @@ func (gen *Generator) IsActive() bool {
 } // func (gen *Generator) IsActive() bool
 
 func (gen *Generator) WorkerCount() int {
-	return gen.iCnt + gen.nCnt
+	return int(gen.addrGenCnt.Load() + gen.nameGenCnt.Load())
 } // func (gen *Generator) WorkerCount() int
 
 // AddrWorkerCount returns the number of address generator workers.
 func (gen *Generator) AddrWorkerCount() int {
-	gen.lock.RLock()
-	defer gen.lock.RUnlock()
-	return gen.iCnt
+	return int(gen.addrGenCnt.Load())
 } // func (gen *Generator) AddrWorkerCount() int
 
 // NameWorkerCount return the number name resolver workers.
 func (gen *Generator) NameWorkerCount() int {
-	return gen.nCnt
+	return int(gen.nameGenCnt.Load())
 } // func (gen *Generator) NameWorkerCount() int
 
 func (gen *Generator) System() subsystem.ID {
@@ -224,6 +213,9 @@ func (gen *Generator) System() subsystem.ID {
 
 func (gen *Generator) addrWorker(id int) {
 	const maxErr = 5
+
+	gen.addrGenCnt.Add(1)
+	defer gen.addrGenCnt.Add(-1)
 
 	gen.log.Printf("[DEBUG] addrWorker#%d starting up...\n", id)
 	defer gen.log.Printf("[DEBUG] addrWorker#%d is quitting.", id)
@@ -310,6 +302,9 @@ func (gen *Generator) nameWorker(id int) {
 		host   *model.Host
 		ticker *time.Ticker
 	)
+
+	gen.nameGenCnt.Add(1)
+	defer gen.nameGenCnt.Add(-1)
 
 	ticker = time.NewTicker(common.ActiveTimeout)
 	defer ticker.Stop()
