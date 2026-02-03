@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-02 20:44:55 krylon>
+# Time-stamp: <2026-02-03 16:03:44 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -15,12 +15,12 @@
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-02 Mo 20:44]
+   #+CAPTION: Clock summary at [2026-02-03 Di 16:03]
    | Headline                                      | Time      |            |      |      |
    |-----------------------------------------------+-----------+------------+------+------|
-   | *Total time*                                  | *2d 1:49* |            |      |      |
+   | *Total time*                                  | *2d 3:38* |            |      |      |
    |-----------------------------------------------+-----------+------------+------+------|
-   | *GuangNG [13/16]*                             | *2d 1:49* |            |      |      |
+   | *GuangNG [13/16]*                             | *2d 3:38* |            |      |      |
    | \_  /Components [3/4]/                        |           | /1d 21:17/ |      |      |
    | \_    Main [0/0]                              |           |            | 0:15 |      |
    | \_    Model [0/0]                             |           |            | 1:37 |      |
@@ -35,13 +35,13 @@
    | \_    Nexus [1/1]                             |           |            | 6:24 |      |
    | \_      Introspection                         |           |            |      | 4:38 |
    | \_    Web UI [0/0]                            |           |            | 5:44 |      |
-   | \_  /Features [7/9]/                          |           | /3:53/     |      |      |
+   | \_  /Features [7/9]/                          |           | /5:42/     |      |      |
    | \_    Allow starting subsystems with zero...  |           |            | 0:43 |      |
    | \_      Generator                             |           |            |      | 0:18 |
    | \_      XFR                                   |           |            |      | 0:07 |
    | \_      Scanner                               |           |            |      | 0:14 |
-   | \_    Control starting/stopping subsystems... |           |            | 3:10 |      |
-   | \_      Web                                   |           |            |      | 0:50 |
+   | \_    Control starting/stopping subsystems... |           |            | 4:59 |      |
+   | \_      Web                                   |           |            |      | 2:39 |
    | \_  /Bugs [2/3]/                              |           | /0:39/     |      |      |
    | \_    Query XFRAdd did not return a value     |           |            | 0:13 |      |
    | \_    Segmentation Violation Blues            |           |            | 0:26 |      |
@@ -225,6 +225,7 @@
     :END:
 **** TODO Web
      :LOGBOOK:
+     CLOCK: [2026-02-03 Di 14:14]--[2026-02-03 Di 16:03] =>  1:49
      CLOCK: [2026-02-02 Mo 19:54]--[2026-02-02 Mo 20:44] =>  0:50
      :END:
 **** DONE Nexus
