@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-03 15:36:08 krylon>
+// Time-stamp: <2026-02-03 17:44:22 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -329,8 +329,10 @@ func (srv *Server) handleSpawnWorker(w http.ResponseWriter, r *http.Request) {
 	for range cnt {
 		srv.nx.StartOne(fac)
 	}
+
 	res.Status = true
-	res.Message = fmt.Sprintf("Started one worker in %s", fac)
+	res.Message = fmt.Sprintf("Started %d workers in %s", cnt, fac)
+	res.NewCnt = srv.nx.GetWorkerCount(fac)
 
 RESPOND:
 	var outbuf []byte
