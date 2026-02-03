@@ -1,38 +1,34 @@
 // /home/krylon/go/src/github.com/blicero/guang/frontend/html/static/controlpanel.js
 // -*- mode: javascript; coding: utf-8; -*-
-// Time-stamp: <2026-02-02 20:30:25 krylon>
+// Time-stamp: <2026-02-03 15:43:37 krylon>
 // Copyright 2022 Benjamin Walkenhorst
 
 'use strict'
 
 var count = {
-    'GenAddr': 0,
-    'GenName': 0,
-    'Scanner': 0,
-    'XFR':     0,
+    'GeneratorAddress': 0,
+    'GeneratorName':    0,
+    'Scanner':          0,
+    'XFR':              0,
 }
 
-// const facilities = {
-//     'GenAddr': 
-// }
-
 const cntID = {
-    'GenAddr': '#cnt_gen_addr',
-    'GenName': '#cnt_gen_name',
-    'Scanner': '#cnt_scan',
-    'XFR':     '#cnt_xfr',
+    'GeneratorAddress': '#cnt_gen_addr',
+    'GeneratorName':    '#cnt_gen_name',
+    'Scanner':          '#cnt_scan',
+    'XFR':              '#cnt_xfr',
 }
 
 const amtID = {
-    'GenAddr':   '#amt_gen_addr',
-    'GenName':   '#amt_gen_name',
-    'Scanner':   '#amt_scan',
-    'XFR':       '#amt_xfr',
+    'GeneratorAddress':   '#amt_gen_addr',
+    'GeneratorName':      '#amt_gen_name',
+    'Scanner':            '#amt_scan',
+    'XFR':                '#amt_xfr',
 }
 
 function workerSpawn(fac) {
     const amt = $(amtID[fac])[0].value
-    const addr = `/ajax/spawn_worker/${facilities[fac]}/${amt}`
+    const addr = `/ajax/spawn_worker/${subsystems[fac]}/${amt}`
     const req = $.get(addr,
                       {},
                       (res) => {
@@ -42,21 +38,21 @@ function workerSpawn(fac) {
                               $(counterID)[0].innerHTML = res.NewCnt
                           } else {
                               // alert(res.Message)
-                              appendMsg(res.Message)
+                              // appendMsg(res.Message)
                           }
                       },
                       'json'
                      ).fail((reply, status, txt) => {
                          const msg = `Failed to load update: ${status} -- ${reply} -- ${txt}`
                          console.log(msg)
-                         //alert(msg)
-                         appendMsg(msg)
+                         // alert(msg)
+                         // appendMsg(msg)
                      })
 } // function spawn(fac)
 
 function workerStop(fac) {
     const amt = $(amtID[fac])[0].value
-    const addr = `/ajax/stop_worker/${facilities[fac]}/${amt}`
+    const addr = `/ajax/stop_worker/${subsystems[fac]}/${amt}`
 
     const req = $.get(
         addr,
@@ -69,7 +65,7 @@ function workerStop(fac) {
                 $(counterID)[0].innerHTML = res.NewCnt
             } else {
                 // alert(res.Message)
-                appendMsg(res.Message)
+                // appendMsg(res.Message)
             }
         },
         'json'
@@ -77,7 +73,7 @@ function workerStop(fac) {
         const msg = `Failed to load update: ${status} -- ${reply} -- ${txt}`
         console.log(msg)
         // alert(msg)
-        appendMsg(msg)
+        // appendMsg(msg)
     })
 } // function stop(fac)
 
@@ -97,7 +93,7 @@ function loadWorkerCount() {
                     const msg = `${res.Timestamp} - Error requesting worker count: ${res.Message}`
                     console.log(msg)
                     // alert(msg)
-                    appendMsg(msg)
+                    // appendMsg(msg)
                 }
             },
             'json'
@@ -105,7 +101,7 @@ function loadWorkerCount() {
             const msg = `Failed to load worker count: ${status} -- ${reply} -- ${txt}`
             console.log(msg)
             // alert(msg)
-            appendMsg(msg)
+            // appendMsg(msg)
         })
     } finally {
         window.setTimeout(loadWorkerCount, 2500)

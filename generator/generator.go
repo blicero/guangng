@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 15:37:34 krylon>
+// Time-stamp: <2026-02-03 15:59:13 krylon>
 
 package generator
 
@@ -159,7 +159,21 @@ func (gen *Generator) getID() int {
 
 // StartAddrworker stars another address generation worker.
 func (gen *Generator) StartAddrWorker() {
+	gen.lock.RLock()
+	var acnt = gen.iCnt
+	gen.lock.RUnlock()
+
+	gen.log.Println("[DEBUG] Start one address worker...")
+
 	go gen.addrWorker(gen.getID())
+
+	gen.lock.RLock()
+	var bcnt = gen.iCnt
+	gen.lock.RUnlock()
+
+	gen.log.Printf("[DEBUG] Address worker count before = %d, after = %d\n",
+		acnt,
+		bcnt)
 } // func (gen *Generator) StartAddrWorker()
 
 // StartNameworker starts another name resolution worker.

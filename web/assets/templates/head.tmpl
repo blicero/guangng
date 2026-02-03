@@ -1,5 +1,5 @@
 {{ define "head" }}
-{{/* Time-stamp: <2026-01-30 15:17:13 krylon> */}}
+{{/* Time-stamp: <2026-02-03 14:33:16 krylon> */}}
 <head>
   <title>{{ app_string }}@{{ hostname  }} - {{ .Title }}</title>
   
@@ -24,6 +24,12 @@
      // window.setTimeout(getNewMessages, 1000);
 
    });
+
+   const subsystems = {
+           {{ range .Subsystems }}
+           "{{ .String }}": {{ .Int }},
+           {{ end }}
+   };
   </script>
 
   <link rel="stylesheet" type="text/css" href="/static/style.css" />

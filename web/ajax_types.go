@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 03. 11. 2022 by Benjamin Walkenhorst
 // (c) 2022 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 16:58:55 krylon>
+// Time-stamp: <2026-02-03 15:30:51 krylon>
 
 package web
 
@@ -27,10 +27,10 @@ type ajaxCtlResponse struct {
 	NewCnt int
 }
 
-type ajaxWorkerCnt struct { // nolint: unused
+type ajaxWorkerCnt struct {
 	ajaxData
-	GeneratorAddr int
-	GeneratorName int
-	XFR           int
-	Scanner       int
+	GeneratorAddress int
+	GeneratorName    int
+	XFR              int
+	Scanner          int
 }

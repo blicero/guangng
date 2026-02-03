@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 20:13:28 krylon>
+// Time-stamp: <2026-02-03 15:36:08 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -134,11 +134,18 @@ func Create(addr string, nx *nexus.Nexus) (*Server, error) {
 
 	// AJAX Handlers
 	srv.router.HandleFunc(
+		"/ajax/worker_count",
+		srv.handleLoadWorkerCount)
+	srv.router.HandleFunc(
 		"/ajax/spawn_worker/{subsys:(?:\\d+)}/{cnt:(?:\\d+)$}",
 		srv.handleSpawnWorker)
 	srv.router.HandleFunc(
 		"/ajax/stop_worker/{subsys:(?:\\d+)}/{cnt:(?:\\d+)$}",
 		srv.handleStopWorker)
+
+	srv.router.HandleFunc(
+		"/ajax/beacon",
+		srv.handleBeacon)
 
 	return srv, nil
 } // func Create(addr string, nx *nexus.Nexus) (*Server, error)
@@ -193,9 +200,10 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 		tmpl *template.Template
 		data = tmplDataIndex{
 			tmplDataBase: tmplDataBase{
-				Title: "Main",
-				Debug: common.Debug,
-				URL:   req.URL.String(),
+				Title:      "Main",
+				Debug:      common.Debug,
+				URL:        req.URL.String(),
+				Subsystems: subsystem.AllSubsystems(),
 			},
 			GenActive:  srv.nx.GetActiveFlag(subsystem.Generator),
 			XFRActive:  srv.nx.GetActiveFlag(subsystem.XFR),
@@ -241,6 +249,42 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 //////////////////////////////////////////////////////////////////////////////
 /// AJAX handlers ////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
+
+func (srv *Server) handleLoadWorkerCount(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handling request for %s\n", r.RequestURI)
+	var (
+		err error
+		res = ajaxWorkerCnt{
+			ajaxData: ajaxData{
+				Timestamp: time.Now(),
+			},
+		}
+	)
+
+	res.GeneratorAddress = srv.nx.GetWorkerCount(subsystem.GeneratorAddress)
+	res.GeneratorName = srv.nx.GetWorkerCount(subsystem.GeneratorName)
+	res.XFR = srv.nx.GetWorkerCount(subsystem.XFR)
+	res.Scanner = srv.nx.GetWorkerCount(subsystem.Scanner)
+	res.Status = true
+
+	var outbuf []byte
+
+	if outbuf, err = json.Marshal(&res); err != nil {
+		res.Message = fmt.Sprintf("Error serializing Response to %s: %s",
+			r.RemoteAddr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+	}
+
+	srv.log.Printf("[DEBUG] Return worker count:\n%s\n\n",
+		outbuf)
+
+	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(outbuf)), 10))
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", cacheControl)
+	w.WriteHeader(200)
+	w.Write(outbuf) // nolint: errcheck
+} // func (srv *Server) handleLoadWorkerCount(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleSpawnWorker(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -367,6 +411,24 @@ RESPOND:
 	w.WriteHeader(200)
 	w.Write(outbuf) // nolint: errcheck
 } // func (srv *Server) handleStopWorker(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
+	// It doesn't bother me enough to do anything about it other
+	// than writing this comment, but this method is probably
+	// grossly inefficient re memory.
+	var timestamp = time.Now().Format(common.TimestampFormat)
+	const appName = common.AppName + " " + common.Version
+	var jstr = fmt.Sprintf(`{ "Status": true, "Message": "%s", "Timestamp": "%s", "Hostname": "%s" }`,
+		appName,
+		timestamp,
+		hostname())
+	var response = []byte(jstr)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(200)
+	w.Write(response) // nolint: errcheck,gosec
+} // func (srv *WebFrontend) handleBeacon(w http.ResponseWriter, r *http.Request)
 
 //////////////////////////////////////////////////////////////////////////////
 /// Handle static assets /////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 19:06:12 krylon>
+// Time-stamp: <2026-02-03 14:33:06 krylon>
 
 package subsystem
 
@@ -19,3 +19,20 @@ const (
 	XFR
 	Scanner
 )
+
+// UInt8 returns the subsystem's integer value.
+func (id ID) Int() int {
+	return int(id)
+} // func (id ID) Int() int
+
+// AllSubsystems returns a slice of all valid subsystem IDs.
+func AllSubsystems() []ID {
+	return []ID{
+		None,
+		Generator,
+		GeneratorAddress,
+		GeneratorName,
+		XFR,
+		Scanner,
+	}
+} // func AllSubsystems() []ID

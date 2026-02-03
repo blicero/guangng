@@ -2,16 +2,19 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2026-01-31 12:52:24 krylon>
+// Time-stamp: <2026-02-03 14:25:20 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
 package web
 
+import "github.com/blicero/guangng/model/subsystem"
+
 type tmplDataBase struct { // nolint: unused
-	Title string
-	Debug bool
-	URL   string
+	Title      string
+	Debug      bool
+	URL        string
+	Subsystems []subsystem.ID
 	// Messages   []*message
 }
 
