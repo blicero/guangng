@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-03 17:44:22 krylon>
+// Time-stamp: <2026-02-04 14:21:05 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -236,7 +236,7 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 			err.Error())
 	}
 
-	w.Header().Set("Cache-Control", cacheControl)
+	w.Header().Set("Cache-Control", noCache)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -281,7 +281,7 @@ func (srv *Server) handleLoadWorkerCount(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(outbuf)), 10))
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", cacheControl)
+	w.Header().Set("Cache-Control", noCache)
 	w.WriteHeader(200)
 	w.Write(outbuf) // nolint: errcheck
 } // func (srv *Server) handleLoadWorkerCount(w http.ResponseWriter, r *http.Request)
@@ -346,7 +346,7 @@ RESPOND:
 
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(outbuf)), 10))
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", cacheControl)
+	w.Header().Set("Cache-Control", noCache)
 	w.WriteHeader(200)
 	w.Write(outbuf) // nolint: errcheck
 } // func handleSpawnWorker(w http.ResponseWriter, req *http.Request)
@@ -395,6 +395,7 @@ func (srv *Server) handleStopWorker(w http.ResponseWriter, r *http.Request) {
 		srv.nx.StopOne(fac)
 	}
 	res.Status = true
+	res.NewCnt = srv.nx.GetWorkerCount(fac)
 	res.Message = fmt.Sprintf("Started one worker in %s", fac)
 
 RESPOND:
@@ -409,7 +410,7 @@ RESPOND:
 
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(outbuf)), 10))
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", cacheControl)
+	w.Header().Set("Cache-Control", noCache)
 	w.WriteHeader(200)
 	w.Write(outbuf) // nolint: errcheck
 } // func (srv *Server) handleStopWorker(w http.ResponseWriter, r *http.Request)
@@ -427,7 +428,7 @@ func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
 	var response = []byte(jstr)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", noCache)
 	w.WriteHeader(200)
 	w.Write(response) // nolint: errcheck,gosec
 } // func (srv *WebFrontend) handleBeacon(w http.ResponseWriter, r *http.Request)
@@ -448,9 +449,9 @@ func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request) {
 	w.Header().Set("Content-Type", mimeType)
 
 	if !common.Debug {
-		w.Header().Set("Cache-Control", "max-age=7200")
+		w.Header().Set("Cache-Control", cacheControl)
 	} else {
-		w.Header().Set("Cache-Control", "no-store, max-age=0")
+		w.Header().Set("Cache-Control", noCache)
 	}
 
 	var (
@@ -498,9 +499,9 @@ func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request
 	w.Header().Set("Content-Type", mimeType)
 
 	if common.Debug {
-		w.Header().Set("Cache-Control", "no-store, max-age=0")
+		w.Header().Set("Cache-Control", noCache)
 	} else {
-		w.Header().Set("Cache-Control", "max-age=7200")
+		w.Header().Set("Cache-Control", cacheControl)
 	}
 
 	var (
@@ -538,6 +539,7 @@ func (srv *Server) sendErrorMessage(w http.ResponseWriter, msg string) {
 </html>
 `
 
+	w.Header().Set("Cache-Control", noCache)
 	srv.log.Printf("[ERROR] %s\n", msg)
 
 	output := fmt.Sprintf(html, msg)
