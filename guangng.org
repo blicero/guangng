@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-04 14:39:14 krylon>
+# Time-stamp: <2026-02-04 18:35:35 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -8,19 +8,19 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* GuangNG [17/18]
+* GuangNG [17/19]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-04 Mi 14:39]
+   #+CAPTION: Clock summary at [2026-02-04 Mi 18:35]
    | Headline                                      | Time      |            |       |      |
    |-----------------------------------------------+-----------+------------+-------+------|
-   | *Total time*                                  | *2d 6:07* |            |       |      |
+   | *Total time*                                  | *2d 9:37* |            |       |      |
    |-----------------------------------------------+-----------+------------+-------+------|
-   | *GuangNG [17/18]*                             | *2d 6:07* |            |       |      |
+   | *GuangNG [17/19]*                             | *2d 9:37* |            |       |      |
    | \_  /Components [5/5]/                        |           | /1d 23:28/ |       |      |
    | \_    Main [0/0]                              |           |            |  0:15 |      |
    | \_    Model [0/0]                             |           |            |  1:37 |      |
@@ -44,7 +44,8 @@
    | \_    Control starting/stopping subsystems... |           |            |  5:17 |      |
    | \_      Web                                   |           |            |       | 2:39 |
    | \_      XFR                                   |           |            |       | 0:18 |
-   | \_  /Bugs [2/3]/                              |           | /0:39/     |       |      |
+   | \_  /Bugs [2/4]/                              |           | /4:09/     |       |      |
+   | \_    Does the XFR engine actually work?      |           |            |  3:30 |      |
    | \_    Query XFRAdd did not return a value     |           |            |  0:13 |      |
    | \_    Segmentation Violation Blues            |           |            |  0:26 |      |
    #+END:
@@ -249,12 +250,19 @@
      :LOGBOOK:
      CLOCK: [2026-02-04 Mi 14:20]--[2026-02-04 Mi 14:38] =>  0:18
      :END:
-** Bugs [2/3]
+** Bugs [2/4]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
+*** TODO Badger barfs on 32-bit system
+    I encountered this on OpenBSD/386, but I have a hunch it's not about
+    OpenBSD but about 32-vs-64 bits.
 *** TODO Does the XFR engine actually work?
+    :LOGBOOK:
+    CLOCK: [2026-02-04 Mi 15:05]--[2026-02-04 Mi 18:35] =>  3:30
+    :END:
+    Doesn't look like it, *thus far*. (Where "thus far" means [2026-02-04 Mi 18:29])
 *** DONE Query XFRAdd did not return a value
     CLOSED: [2026-01-19 Mo 20:00]
     :LOGBOOK:
