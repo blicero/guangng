@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-04 14:34:17 krylon>
+// Time-stamp: <2026-02-04 15:50:55 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -122,6 +122,8 @@ func (x *XFR) System() subsystem.ID {
 	return subsystem.XFR
 } // func (x *XFR) System() subsystem.ID
 
+// hostWorker collects the Hosts that come out of a successful zone transfer
+// and stores them in the Database.
 func (x *XFR) hostWorker() {
 	x.log.Println("[DEBUG] hostWorker starting up...")
 	defer x.log.Println("[DEBUG] hostWorker quitting...")
