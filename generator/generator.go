@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-03 16:47:28 krylon>
+// Time-stamp: <2026-02-03 20:11:18 krylon>
 
 package generator
 
@@ -217,7 +217,9 @@ func (gen *Generator) addrWorker(id int) {
 	gen.addrGenCnt.Add(1)
 	defer gen.addrGenCnt.Add(-1)
 
-	gen.log.Printf("[DEBUG] addrWorker#%d starting up...\n", id)
+	gen.log.Printf("[DEBUG] addrWorker#%d starting up, total worker count is %d...\n",
+		id,
+		gen.addrGenCnt.Load())
 	defer gen.log.Printf("[DEBUG] addrWorker#%d is quitting.", id)
 
 	var ticker = time.NewTicker(common.ActiveTimeout)
@@ -305,6 +307,11 @@ func (gen *Generator) nameWorker(id int) {
 
 	gen.nameGenCnt.Add(1)
 	defer gen.nameGenCnt.Add(-1)
+
+	gen.log.Printf("[DEBUG] nameWorker#%d starting up, total worker count is %d...\n",
+		id,
+		gen.nameGenCnt.Load())
+	defer gen.log.Printf("[DEBUG] addrWorker#%d is quitting.", id)
 
 	ticker = time.NewTicker(common.ActiveTimeout)
 	defer ticker.Stop()

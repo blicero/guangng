@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 16. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 19:56:26 krylon>
+// Time-stamp: <2026-02-04 14:24:49 krylon>
 
 package nexus
 
@@ -93,7 +93,7 @@ func (nx *Nexus) StartOne(s subsystem.ID) {
 	case subsystem.XFR:
 		nx.xfr.StartOne()
 	case subsystem.Scanner:
-		nx.xfr.StopOne()
+		nx.scn.StartOne()
 	default:
 		nx.log.Printf("[ERROR] Don't how to start a %s worker\n",
 			s)
@@ -116,7 +116,7 @@ func (nx *Nexus) StopOne(s subsystem.ID) {
 	case subsystem.XFR:
 		nx.xfr.StopOne()
 	case subsystem.Scanner:
-		nx.xfr.StopOne()
+		nx.scn.StopOne()
 	default:
 		nx.log.Printf("[ERROR] Don't how to stop a %s worker\n",
 			s)

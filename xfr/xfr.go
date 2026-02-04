@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 16:44:38 krylon>
+// Time-stamp: <2026-02-04 14:34:17 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -35,6 +35,7 @@ type XFR struct {
 	active    atomic.Bool
 	xcnt      atomic.Int32
 	idCounter atomic.Int64
+	goalCnt   int
 	cmdQ      chan bool
 	xfrQ      chan *model.Zone
 	hostQ     chan *model.Host
@@ -49,7 +50,9 @@ func New(cnt int) (*XFR, error) {
 	var (
 		err  error
 		xcnt = max(cnt, 2)
-		x    = new(XFR)
+		x    = &XFR{
+			goalCnt: cnt,
+		}
 	)
 
 	if x.log, err = common.GetLogger(logdomain.XFR); err != nil {
@@ -60,7 +63,7 @@ func New(cnt int) (*XFR, error) {
 		return nil, err
 	}
 
-	x.xcnt.Store(int32(cnt))
+	// x.xcnt.Store(int32(cnt))
 	x.cmdQ = make(chan bool, xcnt)
 	x.xfrQ = make(chan *model.Zone, xcnt)
 	x.hostQ = make(chan *model.Host, xcnt)
@@ -91,7 +94,7 @@ func (x *XFR) Start() {
 	go x.hostWorker()
 	go x.xfrFeeder()
 
-	for range x.xcnt.Load() {
+	for range x.goalCnt {
 		go x.xfrWorker(x.getID())
 	}
 } // func (x *XFR) Start()
@@ -220,6 +223,9 @@ func (x *XFR) xfrWorker(id int) {
 		cnt    int64
 		ticker *time.Ticker
 	)
+
+	x.xcnt.Add(1)
+	defer x.xcnt.Add(-1)
 
 	ticker = time.NewTicker(common.ActiveTimeout)
 	defer ticker.Stop()
