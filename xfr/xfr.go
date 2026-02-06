@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-04 15:50:55 krylon>
+// Time-stamp: <2026-02-05 14:56:49 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -26,6 +26,7 @@ import (
 	"github.com/blicero/guangng/model"
 	"github.com/blicero/guangng/model/hsrc"
 	"github.com/blicero/guangng/model/subsystem"
+	"github.com/blicero/krylib"
 	dns "github.com/tonnerre/golang-dns"
 )
 
@@ -163,6 +164,7 @@ func (x *XFR) xfrFeeder() {
 		err    error
 		db     *database.Database
 		ticker *time.Ticker
+		delay  = 1
 	)
 
 	db = x.pool.Get()
@@ -193,10 +195,13 @@ func (x *XFR) xfrFeeder() {
 			x.active.Store(false)
 			return
 		} else if len(xlist) == 0 {
+			delay = min(delay+1, 10)
 			x.log.Println("[DEBUG] No unfinished XFRs were found, maybe next time...")
-			time.Sleep(common.ActiveTimeout)
+			time.Sleep(common.ActiveTimeout * time.Duration(krylib.Fibonacci(delay)))
 			continue
 		}
+
+		delay = 1 // Reset delay if we get nonzero zones
 
 		for _, z := range xlist {
 		SEND:
