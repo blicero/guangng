@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-04 14:21:05 krylon>
+// Time-stamp: <2026-02-05 15:37:33 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -276,8 +276,8 @@ func (srv *Server) handleLoadWorkerCount(w http.ResponseWriter, r *http.Request)
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 	}
 
-	srv.log.Printf("[DEBUG] Return worker count:\n%s\n\n",
-		outbuf)
+	// srv.log.Printf("[DEBUG] Return worker count:\n%s\n\n",
+	// 	outbuf)
 
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(outbuf)), 10))
 	w.Header().Set("Content-Type", "application/json")
