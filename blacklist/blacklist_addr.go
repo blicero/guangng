@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-12 14:59:10 krylon>
+// Time-stamp: <2026-02-05 14:22:54 krylon>
 
 package blacklist
 
@@ -56,7 +56,7 @@ func (al AddrItemList) Less(i, j int) bool {
 // BlacklistAddr is a list of BlacklistItemAddr and a Mutex.
 type BlacklistAddr struct {
 	items AddrItemList
-	lock  sync.Mutex
+	lock  sync.RWMutex
 }
 
 // NewBlacklistAddr create a new AddrBlacklist from the default network list.
@@ -74,8 +74,10 @@ func NewBlacklistAddr() *BlacklistAddr {
 
 // Match checks if the given address is in any of the Blacklist's networks.
 func (al *BlacklistAddr) Match(addr net.IP) bool {
+	al.lock.RLock()
 	for _, item := range al.items {
 		if item.Match(addr) {
+			al.lock.RUnlock()
 			al.lock.Lock()
 			sort.Sort(al.items)
 			al.lock.Unlock()
@@ -83,5 +85,6 @@ func (al *BlacklistAddr) Match(addr net.IP) bool {
 		}
 	}
 
+	al.lock.RUnlock()
 	return false
 } // func (al *AddrBlacklist) Match(addr net.IP) bool

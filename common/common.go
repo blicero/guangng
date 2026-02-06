@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-02-04 14:41:59 krylon>
+// Time-stamp: <2026-02-05 14:38:05 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/blicero/guangng/logdomain"
@@ -104,10 +105,31 @@ var CfgPath = filepath.Join(BaseDir, fmt.Sprintf("%s.toml", strings.ToLower(AppN
 
 var XfrDbgPath = filepath.Join(BaseDir, "xfr.d")
 
+// This needs a little refinement, but should clear up the race condition.
+var (
+	lock   sync.RWMutex
+	isInit bool
+)
+
 // InitApp performs some basic preparations for the application to run.
 // Currently, this means creating the BaseDir folder.
-func InitApp() error {
+func InitApp() (e error) {
 	var err error
+
+	lock.RLock()
+	if isInit {
+		lock.RUnlock()
+		return nil
+	}
+
+	lock.RUnlock()
+	lock.Lock()
+	defer func() {
+		if e == nil {
+			isInit = true
+		}
+		lock.Unlock()
+	}()
 
 	if err = os.Mkdir(BaseDir, 0700); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("error creating BaseDir %s: %s", BaseDir, err.Error())

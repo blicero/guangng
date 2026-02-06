@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-15 18:34:10 krylon>
+// Time-stamp: <2026-02-05 14:23:41 krylon>
 
 package blacklist
 
@@ -48,7 +48,7 @@ func (nl NameItemList) Less(i, j int) bool {
 
 type BlacklistName struct {
 	items NameItemList
-	lock  sync.Mutex
+	lock  sync.RWMutex
 }
 
 func NewBlacklistName() *BlacklistName {
@@ -64,8 +64,10 @@ func NewBlacklistName() *BlacklistName {
 } // func NewNameBlacklist() *NameBlacklist
 
 func (bl *BlacklistName) Match(name string) bool {
+	bl.lock.RLock()
 	for _, i := range bl.items {
 		if status := i.Match(name); status {
+			bl.lock.RUnlock()
 			bl.lock.Lock()
 			sort.Sort(bl.items)
 			bl.lock.Unlock()
@@ -73,5 +75,6 @@ func (bl *BlacklistName) Match(name string) bool {
 		}
 	}
 
+	bl.lock.RUnlock()
 	return false
 } // func (bl *NameBlacklist) Match(name string) bool
