@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-05 15:37:33 krylon>
+// Time-stamp: <2026-02-07 17:17:33 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -131,6 +131,7 @@ func Create(addr string, nx *nexus.Nexus) (*Server, error) {
 	srv.router.HandleFunc("/favicon.ico", srv.handleFavIco)
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{index:(?i:index|main|start)$}", srv.handleMain)
+	srv.router.HandleFunc("/by_port", srv.handleByPort)
 
 	// AJAX Handlers
 	srv.router.HandleFunc(
@@ -245,6 +246,57 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request)
+
+func (srv *Server) handleByPort(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handling request for %s\n", r.RequestURI)
+	const tmplName = "by_port"
+
+	var (
+		err  error
+		msg  string
+		db   *database.Database
+		tmpl *template.Template
+		data = tmplDataByPort{
+			tmplDataBase: tmplDataBase{
+				Title:      "Services by Port",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				Subsystems: subsystem.AllSubsystems(),
+			},
+		}
+	)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Hosts, err = db.HostGetMap(); err != nil {
+		msg = fmt.Sprintf("Failed to get host map: %s", err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.Ports, err = db.ServiceGetSuccess(); err != nil {
+		msg = fmt.Sprintf("Failed to get scanned ports: %s", err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	w.Header().Set("Cache-Control", noCache)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		// srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleByPort(w http.ResponseWriter, r *http.Request)
 
 //////////////////////////////////////////////////////////////////////////////
 /// AJAX handlers ////////////////////////////////////////////////////////////
