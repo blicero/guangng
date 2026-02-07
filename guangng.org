@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-07 16:28:39 krylon>
+# Time-stamp: <2026-02-07 18:50:14 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -15,40 +15,40 @@
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-07 Sa 16:28]
-   | Headline                                      | Time       |            |       |      |
-   |-----------------------------------------------+------------+------------+-------+------|
-   | *Total time*                                  | *2d 12:35* |            |       |      |
-   |-----------------------------------------------+------------+------------+-------+------|
-   | *GuangNG [19/20]*                             | *2d 12:35* |            |       |      |
-   | \_  /Components [5/5]/                        |            | /1d 23:29/ |       |      |
-   | \_    Main [0/0]                              |            |            |  0:15 |      |
-   | \_    Model [0/0]                             |            |            |  1:37 |      |
-   | \_    Database [1/1]                          |            |            |  6:14 |      |
-   | \_      Add queries/methods for services      |            |            |       | 2:58 |
-   | \_    Blacklist [0/0]                         |            |            |  1:08 |      |
-   | \_      Testing                               |            |            |       | 0:12 |
-   | \_    Generator [3/3]                         |            |            | 11:39 |      |
-   | \_      Sanity-check zones for XFR            |            |            |       | 0:47 |
-   | \_      Handle counting workers more...       |            |            |       | 2:11 |
-   | \_    XFR [0/0]                               |            |            |  5:52 |      |
-   | \_    Scanner [0/0]                           |            |            |  8:35 |      |
-   | \_    Nexus [1/1]                             |            |            |  6:24 |      |
-   | \_      Introspection                         |            |            |       | 4:38 |
-   | \_    Web UI [0/0]                            |            |            |  5:45 |      |
-   | \_  /Features [10/10]/                        |            | /6:00/     |       |      |
-   | \_    Allow starting subsystems with zero...  |            |            |  0:43 |      |
-   | \_      Generator                             |            |            |       | 0:18 |
-   | \_      XFR                                   |            |            |       | 0:07 |
-   | \_      Scanner                               |            |            |       | 0:14 |
-   | \_    Control starting/stopping subsystems... |            |            |  5:17 |      |
-   | \_      Web                                   |            |            |       | 2:39 |
-   | \_      XFR                                   |            |            |       | 0:18 |
-   | \_  /Bugs [4/5]/                              |            | /7:06/     |       |      |
-   | \_    Data Race in Blacklist                  |            |            |  0:14 |      |
-   | \_    Does the XFR engine actually work?      |            |            |  6:13 |      |
-   | \_    Query XFRAdd did not return a value     |            |            |  0:13 |      |
-   | \_    Segmentation Violation Blues            |            |            |  0:26 |      |
+   #+CAPTION: Clock summary at [2026-02-07 Sa 18:50]
+   | Headline                                      | Time       |           |       |      |
+   |-----------------------------------------------+------------+-----------+-------+------|
+   | *Total time*                                  | *2d 14:54* |           |       |      |
+   |-----------------------------------------------+------------+-----------+-------+------|
+   | *GuangNG [19/20]*                             | *2d 14:54* |           |       |      |
+   | \_  /Components [5/5]/                        |            | /2d 1:48/ |       |      |
+   | \_    Main [0/0]                              |            |           |  0:15 |      |
+   | \_    Model [0/0]                             |            |           |  1:37 |      |
+   | \_    Database [1/1]                          |            |           |  6:14 |      |
+   | \_      Add queries/methods for services      |            |           |       | 2:58 |
+   | \_    Blacklist [0/0]                         |            |           |  1:08 |      |
+   | \_      Testing                               |            |           |       | 0:12 |
+   | \_    Generator [3/3]                         |            |           | 11:39 |      |
+   | \_      Sanity-check zones for XFR            |            |           |       | 0:47 |
+   | \_      Handle counting workers more...       |            |           |       | 2:11 |
+   | \_    XFR [0/0]                               |            |           |  5:52 |      |
+   | \_    Scanner [0/0]                           |            |           |  8:35 |      |
+   | \_    Nexus [1/1]                             |            |           |  6:24 |      |
+   | \_      Introspection                         |            |           |       | 4:38 |
+   | \_    Web UI [0/0]                            |            |           |  8:04 |      |
+   | \_  /Features [10/10]/                        |            | /6:00/    |       |      |
+   | \_    Allow starting subsystems with zero...  |            |           |  0:43 |      |
+   | \_      Generator                             |            |           |       | 0:18 |
+   | \_      XFR                                   |            |           |       | 0:07 |
+   | \_      Scanner                               |            |           |       | 0:14 |
+   | \_    Control starting/stopping subsystems... |            |           |  5:17 |      |
+   | \_      Web                                   |            |           |       | 2:39 |
+   | \_      XFR                                   |            |           |       | 0:18 |
+   | \_  /Bugs [4/5]/                              |            | /7:06/    |       |      |
+   | \_    Data Race in Blacklist                  |            |           |  0:14 |      |
+   | \_    Does the XFR engine actually work?      |            |           |  6:13 |      |
+   | \_    Query XFRAdd did not return a value     |            |           |  0:13 |      |
+   | \_    Segmentation Violation Blues            |            |           |  0:26 |      |
    #+END:
 ** Components [5/5]
    :PROPERTIES:
@@ -182,6 +182,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2026-02-07 Sa 16:30]--[2026-02-07 Sa 18:49] =>  2:19
     CLOCK: [2026-02-07 Sa 16:27]--[2026-02-07 Sa 16:28] =>  0:01
     CLOCK: [2026-01-31 Sa 14:14]--[2026-01-31 Sa 15:18] =>  1:04
     CLOCK: [2026-01-30 Fr 19:13]--[2026-01-30 Fr 19:16] =>  0:03
