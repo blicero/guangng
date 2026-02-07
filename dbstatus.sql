@@ -1,9 +1,9 @@
 #!/bin/sh
--- /home/krylon/go/src/github.com/blicero/guangng/dbstatus.sql
--- Time-stamp: <2026-02-07 15:12:01 krylon>
--- created on 07. 02. 2026 by Benjamin Walkenhorst
--- (c) 2026 Benjamin Walkenhorst
--- Use at your own risk!
+# -- /home/krylon/go/src/github.com/blicero/guangng/dbstatus.sql
+# -- Time-stamp: <2026-02-07 15:13:32 krylon>
+# -- created on 07. 02. 2026 by Benjamin Walkenhorst
+# -- (c) 2026 Benjamin Walkenhorst
+# -- Use at your own risk!
 
 sqlite3 ~/.guangng.d/guangng.db <<EOF
 SELECT COUNT(id) AS host_cnt FROM host;
