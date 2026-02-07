@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 14:25:57 krylon>
+// Time-stamp: <2026-02-07 16:48:35 krylon>
 
 package database
 
@@ -133,6 +133,78 @@ EXEC_QUERY:
 
 	return nil, nil
 } // func (db *Database) HostGetByID(id int64) (*model.Host, error)
+
+// HostGetMap returns a map of all Hosts, using their IDs as keys.
+func (db *Database) HostGetMap() (map[int64]*model.Host, error) {
+	const qid query.ID = query.HostGetAll
+
+	var err error
+	var msg string
+	var stmt *sql.Stmt
+	var hosts map[int64]*model.Host
+
+GET_QUERY:
+	if stmt, err = db.getQuery(qid); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto GET_QUERY
+		} else {
+			db.log.Printf("[ERROR] Error getting query %s: %s",
+				qid,
+				err.Error())
+			return nil, err
+		}
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(-1); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto EXEC_QUERY
+		} else {
+			msg = fmt.Sprintf("Error querying all hosts: %s",
+				err.Error())
+			db.log.Println(msg)
+			return nil, errors.New(msg)
+		}
+	} else {
+		defer rows.Close() // nolint: errcheck
+	}
+
+	hosts = make(map[int64]*model.Host)
+
+	for rows.Next() {
+		var added, contact int64
+		var addrStr string
+		var host = new(model.Host)
+
+		if err = rows.Scan(
+			&host.ID,
+			&addrStr,
+			&host.Name,
+			&added,
+			&contact,
+			&host.Sysname,
+			&host.Location,
+			&host.Source); err != nil {
+			msg = fmt.Sprintf("Error scanning row: %s", err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		host.Addr = net.ParseIP(addrStr)
+		host.Added = time.Unix(added, 0)
+		host.LastContact = time.Unix(contact, 0)
+		// hosts = append(hosts, host)
+		hosts[host.ID] = host
+	}
+
+	return hosts, nil
+} // func (db *Database) HostGetMap() (map[int64]*model.Host, error)
 
 // HostGetRandom returns up to <max> Hosts randomly picked from the database.
 func (db *Database) HostGetRandom(max int) ([]*model.Host, error) {

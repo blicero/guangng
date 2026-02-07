@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 17:31:08 krylon>
+// Time-stamp: <2026-02-07 16:56:15 krylon>
 
 package database
 
@@ -125,5 +125,16 @@ WHERE host_id = ?
 SELECT COUNT(id)
 FROM svc
 WHERE response IS NOT NULL
+`,
+	query.ServiceGetSuccess: `
+SELECT
+    id,
+    host_id,
+    port,
+    success,
+    response,
+    timestamp
+FROM svc
+WHERE response IS NOT NULL AND response <> ''
 `,
 }
