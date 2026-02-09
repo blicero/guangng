@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-07 17:16:11 krylon>
+// Time-stamp: <2026-02-09 14:32:22 krylon>
 
 package database
 
@@ -233,14 +233,16 @@ EXEC_QUERY:
 
 	for rows.Next() {
 		var (
-			svc          = &model.Service{HostID: h.ID}
+			svc          = new(model.Service)
 			tstamp, port int64
 		)
 
 		if err = rows.Scan(
 			&svc.ID,
+			&svc.HostID,
 			&port,
 			&svc.Success,
+			&svc.Response,
 			&tstamp); err != nil {
 			msg = fmt.Sprintf("Error scanning row: %s", err.Error())
 			db.log.Printf("[ERROR] %s\n", msg)
