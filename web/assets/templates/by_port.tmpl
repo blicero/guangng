@@ -1,6 +1,6 @@
 {{ define "by_port" }}
 {{/* Created on 30. 01. 2026 */}}
-{{/* Time-stamp: <2026-02-09 14:47:50 krylon> */}}
+{{/* Time-stamp: <2026-02-09 15:11:09 krylon> */}}
 <html>
     {{ template "head" . }}
 
@@ -19,25 +19,48 @@
                  }
          }
 
-         {{/*
          $(document).ready(() => {
                  console.log('Initialize page elements...')
                  $('.filter_checkbox').each(() => {
                          $(this).checked = false
                  })
                  $('.port_results').show()
-                 $('#toggle_update')[0].checked = settings.update.active
-                 $('#update_interval_edit')[0].value = settings.update.interval / 1000
-                 window.setTimeout(update_results, settings.update.interval)
+                 // $('#toggle_update')[0].checked = settings.update.active
+                 // $('#update_interval_edit')[0].value = settings.update.interval / 1000
+                 // window.setTimeout(update_results, settings.update.interval)
          })
-                 */}}
         </script>
+
+        <hr />
+
+        <table class="table table-striped table-success">
+            <thead>
+                <tr>
+                    <th>Port #</th>
+                    <th>Hide?</th>
+                </tr>
+            </thead>
+
+            {{ range $port, $svc := .Ports }}
+            <tr>
+                <td>{{ $port }}</td>
+                <td>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input filter_checkbox"
+                               type="checkbox"
+                               onchange="toggle_port_visibility({{ $port }}, this.checked);"
+                               id="checkbox_{{ $port }}" />
+                    </div>
+                </td>
+            </tr>
+            {{ end }}
+        </table>
 
         <hr />
 
         {{ $hosts := .Hosts }}
         {{ range $port, $svc := .Ports }}
-        <div id="content_port_{{ $port }}" class="port">
+        <div id="content_port_{{ $port }}" class="port_results">
             <h3>Port {{ $port }}</h3>
 
             <table class="table table-striped">
