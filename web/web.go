@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-07 17:17:33 krylon>
+// Time-stamp: <2026-02-09 14:44:04 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -205,14 +205,14 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 				Debug:      common.Debug,
 				URL:        req.URL.String(),
 				Subsystems: subsystem.AllSubsystems(),
+				GenActive:  srv.nx.GetActiveFlag(subsystem.Generator),
+				XFRActive:  srv.nx.GetActiveFlag(subsystem.XFR),
+				ScanActive: srv.nx.GetActiveFlag(subsystem.Scanner),
+				GenAddrCnt: srv.nx.GetWorkerCount(subsystem.GeneratorAddress),
+				GenNameCnt: srv.nx.GetWorkerCount(subsystem.GeneratorName),
+				XFRCnt:     srv.nx.GetWorkerCount(subsystem.XFR),
+				ScanCnt:    srv.nx.GetWorkerCount(subsystem.Scanner),
 			},
-			GenActive:  srv.nx.GetActiveFlag(subsystem.Generator),
-			XFRActive:  srv.nx.GetActiveFlag(subsystem.XFR),
-			ScanActive: srv.nx.GetActiveFlag(subsystem.Scanner),
-			GenAddrCnt: srv.nx.GetWorkerCount(subsystem.GeneratorAddress),
-			GenNameCnt: srv.nx.GetWorkerCount(subsystem.GeneratorName),
-			XFRCnt:     srv.nx.GetWorkerCount(subsystem.XFR),
-			ScanCnt:    srv.nx.GetWorkerCount(subsystem.Scanner),
 		}
 	)
 
@@ -262,6 +262,13 @@ func (srv *Server) handleByPort(w http.ResponseWriter, r *http.Request) {
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
 				Subsystems: subsystem.AllSubsystems(),
+				GenActive:  srv.nx.GetActiveFlag(subsystem.Generator),
+				XFRActive:  srv.nx.GetActiveFlag(subsystem.XFR),
+				ScanActive: srv.nx.GetActiveFlag(subsystem.Scanner),
+				GenAddrCnt: srv.nx.GetWorkerCount(subsystem.GeneratorAddress),
+				GenNameCnt: srv.nx.GetWorkerCount(subsystem.GeneratorName),
+				XFRCnt:     srv.nx.GetWorkerCount(subsystem.XFR),
+				ScanCnt:    srv.nx.GetWorkerCount(subsystem.Scanner),
 			},
 		}
 	)
@@ -586,7 +593,7 @@ func (srv *Server) sendErrorMessage(w http.ResponseWriter, msg string) {
     <p>
     Back to <a href="/index">Homepage</a>
     <hr />
-    &copy; 2018 <a href="mailto:krylon@gmx.net">Benjamin Walkenhorst</a>
+    &copy; 2026 <a href="mailto:krylon@gmx.net">Benjamin Walkenhorst</a>
   </body>
 </html>
 `

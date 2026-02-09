@@ -1,26 +1,11 @@
 {{ define "by_port" }}
 {{/* Created on 30. 01. 2026 */}}
-{{/* Time-stamp: <2026-01-30 19:10:26 krylon> */}}
+{{/* Time-stamp: <2026-02-09 14:47:50 krylon> */}}
 <html>
     {{ template "head" . }}
 
     <body>
-        <h1>{{.Title}}</h1>
-        <hr />
-
-        {{if (gt (len .Error) 0)}}
-        <div class="error">
-            {{range .Error}}
-            {{.}}<br />
-            {{end}}
-        </div>
-        {{end}}
-
-        {{ template "beacon" . }}
-
-        <p>&nbsp;</p>
-
-        {{ template "menu" }}
+        {{ template "intro" . }}
 
         <script src="/static/update.js"></script>
 
@@ -34,6 +19,7 @@
                  }
          }
 
+         {{/*
          $(document).ready(() => {
                  console.log('Initialize page elements...')
                  $('.filter_checkbox').each(() => {
@@ -44,9 +30,45 @@
                  $('#update_interval_edit')[0].value = settings.update.interval / 1000
                  window.setTimeout(update_results, settings.update.interval)
          })
+                 */}}
         </script>
 
-        {{ template "controlpanel" . }}
+        <hr />
+
+        {{ $hosts := .Hosts }}
+        {{ range $port, $svc := .Ports }}
+        <div id="content_port_{{ $port }}" class="port">
+            <h3>Port {{ $port }}</h3>
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Host</th>
+                        <th>Time</th>
+                        <th>Response</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {{ range $svc }}
+                    <tr>
+                        {{ $host := index $hosts .HostID }}
+                        <td>{{ $host.Name }} ({{ $host.AStr }})</td>
+                        <td>{{ fmt_time .Timestamp }}</td>
+                        <td>
+                            <pre>
+{{ .Response }}
+                            </pre>
+                        </td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        <hr />
+        {{ end }}
+
+        {{ template "footer" . }}
     </body>
 </html>
 {{ end }}
