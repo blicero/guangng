@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-09 14:53:22 krylon>
+# Time-stamp: <2026-02-09 15:18:38 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -15,13 +15,13 @@
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-09 Mo 14:53]
+   #+CAPTION: Clock summary at [2026-02-09 Mo 15:18]
    | Headline                                      | Time       |           |       |      |
    |-----------------------------------------------+------------+-----------+-------+------|
-   | *Total time*                                  | *2d 15:42* |           |       |      |
+   | *Total time*                                  | *2d 16:01* |           |       |      |
    |-----------------------------------------------+------------+-----------+-------+------|
-   | *GuangNG [19/20]*                             | *2d 15:42* |           |       |      |
-   | \_  /Components [5/5]/                        |            | /2d 2:36/ |       |      |
+   | *GuangNG [19/20]*                             | *2d 16:01* |           |       |      |
+   | \_  /Components [5/5]/                        |            | /2d 2:55/ |       |      |
    | \_    Main [0/0]                              |            |           |  0:15 |      |
    | \_    Model [0/0]                             |            |           |  1:37 |      |
    | \_    Database [1/1]                          |            |           |  6:14 |      |
@@ -35,7 +35,8 @@
    | \_    Scanner [0/0]                           |            |           |  8:35 |      |
    | \_    Nexus [1/1]                             |            |           |  6:24 |      |
    | \_      Introspection                         |            |           |       | 4:38 |
-   | \_    Web UI [0/0]                            |            |           |  8:52 |      |
+   | \_    Web UI [0/0]                            |            |           |  9:11 |      |
+   | \_      By Port                               |            |           |       | 0:19 |
    | \_  /Features [10/10]/                        |            | /6:00/    |       |      |
    | \_    Allow starting subsystems with zero...  |            |           |  0:43 |      |
    | \_      Generator                             |            |           |       | 0:18 |
@@ -198,6 +199,10 @@
     Now that the core is sorta-kinda working, I need a UI to watch the engine
     running and inspect the Hosts and Services it gathers.
     As before, a web interface seems a natural choice. So let's go.
+**** By Port
+     :LOGBOOK:
+     CLOCK: [2026-02-09 Mo 14:59]--[2026-02-09 Mo 15:18] =>  0:19
+     :END:
 ** Features [10/10]                                                 :feature:
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
