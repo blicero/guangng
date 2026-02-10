@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 15:08:28 krylon>
+// Time-stamp: <2026-02-10 20:19:30 krylon>
 
 //go:build ignore
 // +build ignore
@@ -75,6 +75,7 @@ var candidates = map[string][]string{
 		"model",
 		"model/hsrc",
 		"model/subsystem",
+		"model/meta",
 		"blacklist",
 		"database",
 		"database/query",
@@ -88,6 +89,7 @@ var candidates = map[string][]string{
 		"model",
 		"model/hsrc",
 		"model/subsystem",
+		"model/meta",
 		"blacklist",
 		"database",
 		"database/query",

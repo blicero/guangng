@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-19 18:53:48 krylon>
+// Time-stamp: <2026-02-10 20:01:21 krylon>
 
 package logdomain
 
@@ -22,6 +22,7 @@ const (
 	XFR
 	Scanner
 	Nexus
+	MetaEngine
 )
 
 // AllDomains returns a slice of all valid values for logdomain.ID
@@ -37,5 +38,6 @@ func AllDomains() []ID {
 		XFR,
 		Scanner,
 		Nexus,
+		MetaEngine,
 	}
 } // func AllDomains() []ID
