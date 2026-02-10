@@ -1,6 +1,6 @@
 {{ define "by_port" }}
 {{/* Created on 30. 01. 2026 */}}
-{{/* Time-stamp: <2026-02-09 15:11:09 krylon> */}}
+{{/* Time-stamp: <2026-02-10 18:59:40 krylon> */}}
 <html>
     {{ template "head" . }}
 
@@ -37,13 +37,19 @@
             <thead>
                 <tr>
                     <th>Port #</th>
+                    <th># responses</th>
                     <th>Hide?</th>
                 </tr>
             </thead>
 
             {{ range $port, $svc := .Ports }}
             <tr>
-                <td>{{ $port }}</td>
+                <td>
+                    <a href="#content_port_{{ $port }}">
+                        {{ $port }}
+                    </a>
+                </td>
+                <td>{{ len $svc }}</td>
                 <td>
                     <div class="form-check form-switch">
                         <input class="form-check-input filter_checkbox"
@@ -54,6 +60,11 @@
                 </td>
             </tr>
             {{ end }}
+            <tr>
+                <td>Total</td>
+                <td>{{ .TotalResponses }}</td>
+                <td>&nbsp;</td>
+            </tr>
         </table>
 
         <hr />

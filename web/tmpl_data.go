@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2026-02-09 14:43:32 krylon>
+// Time-stamp: <2026-02-10 19:00:33 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -44,3 +44,14 @@ type tmplDataByPort struct {
 	Ports map[uint16][]*model.Service
 	Hosts map[int64]*model.Host
 }
+
+// TotalResponses returns the total number of responses.
+func (d *tmplDataByPort) TotalResponses() int64 {
+	var cnt int
+
+	for _, res := range d.Ports {
+		cnt += len(res)
+	}
+
+	return int64(cnt)
+} // func (d *tmplDataByPort) TotalResponses() int64
