@@ -1,6 +1,6 @@
 {{ define "by_port" }}
 {{/* Created on 30. 01. 2026 */}}
-{{/* Time-stamp: <2026-02-10 18:59:40 krylon> */}}
+{{/* Time-stamp: <2026-02-11 15:54:00 krylon> */}}
 <html>
     {{ template "head" . }}
 
@@ -78,6 +78,7 @@
                 <thead>
                     <tr>
                         <th>Host</th>
+                        <th>Location</th>
                         <th>Time</th>
                         <th>Response</th>
                     </tr>
@@ -88,6 +89,7 @@
                     <tr>
                         {{ $host := index $hosts .HostID }}
                         <td>{{ $host.Name }} ({{ $host.AStr }})</td>
+                        <td>{{ $host.Location }}</td>
                         <td>{{ fmt_time .Timestamp }}</td>
                         <td>
                             <pre>
