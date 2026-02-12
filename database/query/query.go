@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 17:16:00 krylon>
+// Time-stamp: <2026-02-11 14:34:37 krylon>
 
 package query
 
@@ -17,6 +17,7 @@ const (
 	HostGetByAddr
 	HostGetAll
 	HostGetRandom
+	HostGetMissingLocation
 	HostGetCnt
 	HostUpdateSysname
 	HostUpdateLocation

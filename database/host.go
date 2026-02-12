@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-07 16:48:35 krylon>
+// Time-stamp: <2026-02-11 15:03:02 krylon>
 
 package database
 
@@ -276,6 +276,76 @@ EXEC_QUERY:
 	return hosts, nil
 } // func (db *Database) HostGetRandom(n int) ([]*model.Host, error)
 
+// HostGetMissingLocation returns a slice of all Hosts that have no location.
+func (db *Database) HostGetMissingLocation() ([]*model.Host, error) {
+	const qid query.ID = query.HostGetMissingLocation
+	var err error
+	var msg string
+	var stmt *sql.Stmt
+	var hosts []*model.Host
+
+GET_QUERY:
+	if stmt, err = db.getQuery(qid); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto GET_QUERY
+		} else {
+			db.log.Printf("[ERROR] Error getting query %s: %s",
+				qid,
+				err.Error())
+			return nil, err
+		}
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto EXEC_QUERY
+		} else {
+			msg = fmt.Sprintf("Error querying hosts without location: %s",
+				err.Error())
+			db.log.Println(msg)
+			return nil, errors.New(msg)
+		}
+	} else {
+		defer rows.Close() // nolint: errcheck
+	}
+
+	hosts = make([]*model.Host, 0, 16)
+
+	for rows.Next() {
+		var added, contact int64
+		var addrStr string
+		var host = new(model.Host)
+
+		if err = rows.Scan(
+			&host.ID,
+			&addrStr,
+			&host.Name,
+			&added,
+			&contact,
+			&host.Sysname,
+			&host.Location,
+			&host.Source); err != nil {
+			msg = fmt.Sprintf("Error scanning row: %s", err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		host.Addr = net.ParseIP(addrStr)
+		host.Added = time.Unix(added, 0)
+		host.LastContact = time.Unix(contact, 0)
+		hosts = append(hosts, host)
+	}
+
+	return hosts, nil
+} // func (db *Database) HostGetMissingLocation() ([]*model.Host, error)
+
 // HostGetCnt returns the number of Hosts in the Database.
 func (db *Database) HostGetCnt() (int64, error) {
 	const qid query.ID = query.HostGetCnt
@@ -320,3 +390,75 @@ EXEC_QUERY:
 
 	return -1, nil
 } // func (db *Database) HostGetCnt() (int64, error)
+
+// HostUpdateLocation sets a Host's location.
+func (db *Database) HostUpdateLocation(h *model.Host, location string) error {
+	const qid query.ID = query.HostUpdateLocation
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Failed to prepare query %s: %s\n",
+			qid,
+			err.Error())
+		panic(err)
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(location, h.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot update location of Host %s/%s: %w",
+				h.Name,
+				h.AStr(),
+				err)
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	h.Location = location
+	return nil
+} // func (db *Database) HostUpdateLocation(h *model.Host, location string) error
+
+// HostUpdateSysname sets a Host's sysname.
+func (db *Database) HostUpdateSysname(h *model.Host, sysname string) error {
+	const qid query.ID = query.HostUpdateSysname
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Failed to prepare query %s: %s\n",
+			qid,
+			err.Error())
+		panic(err)
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(sysname, h.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot update sysname of Host %s/%s: %w",
+				h.Name,
+				h.AStr(),
+				err)
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	h.Sysname = sysname
+	return nil
+} // func (db *Database) HostUpdateSysname(h *model.Host, sysname string) error
