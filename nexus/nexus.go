@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 16. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-04 14:24:49 krylon>
+// Time-stamp: <2026-02-11 15:41:24 krylon>
 
 package nexus
 
@@ -14,6 +14,7 @@ import (
 	"github.com/blicero/guangng/common"
 	"github.com/blicero/guangng/generator"
 	"github.com/blicero/guangng/logdomain"
+	"github.com/blicero/guangng/model/meta"
 	"github.com/blicero/guangng/model/subsystem"
 	"github.com/blicero/guangng/scanner"
 	"github.com/blicero/guangng/xfr"
@@ -26,6 +27,7 @@ type Nexus struct {
 	gen    *generator.Generator
 	xfr    *xfr.XFR
 	scn    *scanner.Scanner
+	eng    *meta.Engine
 }
 
 // New returns a new Nexus.
@@ -49,6 +51,10 @@ func New(gaCnt, gnCnt, xcnt, scnt int) (*Nexus, error) {
 		nx.log.Printf("[CRITICAL] Failed to create Scanner: %s\n",
 			err.Error())
 		return nil, err
+	} else if nx.eng, err = meta.OpenMetaEngine(); err != nil {
+		nx.log.Printf("[CRITICAL] Failed to create MetaEngine: %s\n",
+			err.Error())
+		return nil, err
 	}
 
 	return nx, nil
@@ -66,6 +72,7 @@ func (nx *Nexus) Start() {
 	nx.gen.Start()
 	nx.xfr.Start()
 	nx.scn.Start()
+	nx.eng.Start()
 } // func (nx *Nexus) Start()
 
 // Stop all running subsystems.
@@ -75,6 +82,7 @@ func (nx *Nexus) Stop() {
 	nx.gen.Stop()
 	nx.xfr.Stop()
 	nx.scn.Stop()
+	nx.eng.Stop()
 } // func (nx *Nexus) Stop()
 
 // StartOne starts an additional worker in one subsystem.
@@ -132,6 +140,8 @@ func (nx *Nexus) GetActiveFlag(sub subsystem.ID) bool {
 		return nx.xfr.IsActive()
 	case subsystem.Scanner:
 		return nx.scn.IsActive()
+	case subsystem.MetaEngine:
+		return nx.eng.IsActive()
 	default:
 		var err = fmt.Errorf("invalid subsystem ID: %s (%d)",
 			sub,

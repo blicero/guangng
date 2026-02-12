@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-03 14:33:06 krylon>
+// Time-stamp: <2026-02-11 15:37:14 krylon>
 
 package subsystem
 
@@ -18,6 +18,7 @@ const (
 	GeneratorName
 	XFR
 	Scanner
+	MetaEngine
 )
 
 // UInt8 returns the subsystem's integer value.
@@ -34,5 +35,6 @@ func AllSubsystems() []ID {
 		GeneratorName,
 		XFR,
 		Scanner,
+		MetaEngine,
 	}
 } // func AllSubsystems() []ID
