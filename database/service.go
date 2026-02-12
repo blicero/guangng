@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-09 14:32:22 krylon>
+// Time-stamp: <2026-02-11 14:39:28 krylon>
 
 package database
 
@@ -190,6 +190,7 @@ EXEC_QUERY:
 	return -1, nil
 } // func (db *Database) ServiceGetCnt() (int64, error)
 
+// ServiceGetSuccess returns a slice of all scanned ports where we got a response.
 func (db *Database) ServiceGetSuccess() (map[uint16][]*model.Service, error) {
 	const qid query.ID = query.ServiceGetSuccess
 	var err error
