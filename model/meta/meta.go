@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 02. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-11 16:36:16 krylon>
+// Time-stamp: <2026-02-12 15:03:02 krylon>
 
 // Package meta provides facilities to guesstimate the locations and operating
 // systems of Hosts.
@@ -161,6 +161,10 @@ func (m *Engine) Close() {
 func (m *Engine) Start() {
 	m.active.Store(true)
 	go m.worker()
+	go func() {
+		time.Sleep(time.Minute)
+		m.updateQ <- true
+	}()
 } // func (m *MetaEngine) Start()
 
 // Stop tells the Engine's worker to quit.
@@ -212,14 +216,18 @@ func (m *Engine) worker() {
 
 func (m *Engine) updateMeta() error {
 	var (
-		err    error
-		status bool
-		db     *database.Database
-		hosts  []*model.Host
-		cnt    int
+		err   error
+		db    *database.Database
+		hosts []*model.Host
+		cnt   int
+		// status bool
 	)
 
 	m.log.Println("[TRACE] Let's see if we can fill in some blanks...")
+	defer func() {
+		m.log.Printf("[DEBUG] Updated location for %d hosts.\n",
+			cnt)
+	}()
 
 	// ...
 	if db, err = database.Open(common.DbPath); err != nil {
@@ -232,25 +240,28 @@ func (m *Engine) updateMeta() error {
 	// in one big transaction. But that only occurred to me when I was nearly done
 	// writing this code, so I guess I can at least test it and see how it
 	// goes.
-	if err = db.Begin(); err != nil {
-		m.log.Printf("[ERROR] Failed to start DB transaction: %s\n",
-			err.Error())
-		return err
-	}
+	// if err = db.Begin(); err != nil {
+	// 	m.log.Printf("[ERROR] Failed to start DB transaction: %s\n",
+	// 		err.Error())
+	// 	return err
+	// }
 
-	defer func() {
-		if status {
-			db.Commit() // nolint: errcheck
-		} else {
-			db.Rollback() // nolint: errcheck
-		}
-	}()
+	// defer func() {
+	// 	if status {
+	// 		db.Commit() // nolint: errcheck
+	// 	} else {
+	// 		db.Rollback() // nolint: errcheck
+	// 	}
+	// }()
 
 	if hosts, err = db.HostGetMissingLocation(); err != nil {
 		m.log.Printf("[ERROR] Failed to get list of Hosts missing metadata: %s\n",
 			err.Error())
 		return err
 	}
+
+	m.log.Printf("[DEBUG] Attempting to guess location for %d hosts.\n",
+		len(hosts))
 
 	for _, h := range hosts {
 		var (
@@ -283,6 +294,11 @@ func (m *Engine) updateMeta() error {
 			continue
 		}
 
+		m.log.Printf("[DEBUG] Set location for %s/%s to %s\n",
+			h.Name,
+			h.AStr(),
+			location)
+
 		if err = db.HostUpdateLocation(h, location); err != nil {
 			m.log.Printf("[ERROR] Failed to update Host location for %s/%s: %s\n",
 				h.Name,
@@ -295,10 +311,7 @@ func (m *Engine) updateMeta() error {
 
 	}
 
-	m.log.Printf("[DEBUG] Updated location for %d hosts.\n",
-		cnt)
-
-	status = true
+	// status = true
 	return nil
 } // func (m *MetaEngine) updateMeta()
 
