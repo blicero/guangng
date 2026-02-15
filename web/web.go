@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-09 14:44:04 krylon>
+// Time-stamp: <2026-02-10 20:31:17 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -242,7 +242,6 @@ func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request) {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
 			err.Error())
-		// srv.SendMessage(msg)
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleMain(w http.ResponseWriter, req *http.Request)
