@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-12 15:01:56 krylon>
+// Time-stamp: <2026-02-13 15:14:57 krylon>
 
 package scanner
 
@@ -13,7 +13,6 @@ import (
 	"net"
 	"net/http"
 	"regexp"
-	"sync"
 	"time"
 	"unicode"
 	"unicode/utf8"
@@ -241,13 +240,13 @@ func (scn *Scanner) scanHTTP(host *model.Host, port uint16) (*scanResult, error)
 	return result, nil
 } // func (scn *Scanner) scanHTTP(host *model.Host, port uint16) (*scanResult, error)
 
-var snmpLock sync.Mutex
+// var snmpLock sync.Mutex
 
 func (scn *Scanner) scanSNMP(host *model.Host, port uint16) (*scanResult, error) {
 	scn.log.Printf("[TRACE] Scanning %s:%d using SNMP scanner.\n", host.AStr(), port)
 
-	snmpLock.Lock()
-	defer snmpLock.Unlock()
+	// snmpLock.Lock()
+	// defer snmpLock.Unlock()
 
 	snmp, err := gosnmp.NewGoSNMP(host.AStr(), "public", gosnmp.Version2c, 5)
 	if err != nil {
