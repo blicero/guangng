@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 02. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-12 15:03:02 krylon>
+// Time-stamp: <2026-02-13 17:03:01 krylon>
 
 // Package meta provides facilities to guesstimate the locations and operating
 // systems of Hosts.
@@ -145,10 +145,11 @@ func OpenMetaEngine() (*Engine, error) {
 			err.Error())
 		eng.log.Printf("[ERROR] %s\n", msg)
 		return nil, errors.New(msg)
-	} else {
-		eng.updateQ = make(chan bool, 1)
-		return eng, nil
 	}
+
+	eng.updateQ = make(chan bool, 1)
+	return eng, nil
+
 } // func OpenMetaEngine() (*MetaEngine, error)
 
 // Close closes the MetaEngine.
@@ -195,32 +196,25 @@ func (m *Engine) worker() {
 	defer heartbeat.Stop()
 
 	for m.active.Load() {
-		var err error
-
 		select {
 		case <-heartbeat.C:
 			continue
 		case <-m.updateQ:
-			if err = m.updateMeta(); err != nil {
-				m.log.Printf("[ERROR] Failed to fill in missing metadata: %s\n",
-					err.Error())
-			}
+			m.guessOS()
+			m.guessLocation()
 		case <-refreshTicker.C:
-			if err = m.updateMeta(); err != nil {
-				m.log.Printf("[ERROR] Failed to fill in missing metadata: %s\n",
-					err.Error())
-			}
+			m.guessOS()
+			m.guessLocation()
 		}
 	}
 } // func (m *MetaEngine) worker()
 
-func (m *Engine) updateMeta() error {
+func (m *Engine) guessLocation() {
 	var (
 		err   error
 		db    *database.Database
 		hosts []*model.Host
 		cnt   int
-		// status bool
 	)
 
 	m.log.Println("[TRACE] Let's see if we can fill in some blanks...")
@@ -229,35 +223,19 @@ func (m *Engine) updateMeta() error {
 			cnt)
 	}()
 
-	// ...
+	// db = m.pool.Get()
+	// defer m.pool.Put(db)
 	if db, err = database.Open(common.DbPath); err != nil {
-		return err
+		m.log.Printf("[ERROR] Failed to open database: %s\n",
+			err.Error())
+		return
 	}
-
 	defer db.Close() // nolint: errcheck
-
-	// I am not entirely sure if it is prudent to update all Hosts' location
-	// in one big transaction. But that only occurred to me when I was nearly done
-	// writing this code, so I guess I can at least test it and see how it
-	// goes.
-	// if err = db.Begin(); err != nil {
-	// 	m.log.Printf("[ERROR] Failed to start DB transaction: %s\n",
-	// 		err.Error())
-	// 	return err
-	// }
-
-	// defer func() {
-	// 	if status {
-	// 		db.Commit() // nolint: errcheck
-	// 	} else {
-	// 		db.Rollback() // nolint: errcheck
-	// 	}
-	// }()
 
 	if hosts, err = db.HostGetMissingLocation(); err != nil {
 		m.log.Printf("[ERROR] Failed to get list of Hosts missing metadata: %s\n",
 			err.Error())
-		return err
+		return
 	}
 
 	m.log.Printf("[DEBUG] Attempting to guess location for %d hosts.\n",
@@ -288,9 +266,9 @@ func (m *Engine) updateMeta() error {
 		} else if country != "" {
 			location = country
 		} else {
-			m.log.Printf("[DEBUG] Could not determine location for %s/%s\n",
-				h.Name,
-				h.AStr())
+			// m.log.Printf("[DEBUG] Could not determine location for %s/%s\n",
+			// 	h.Name,
+			// 	h.AStr())
 			continue
 		}
 
@@ -304,16 +282,108 @@ func (m *Engine) updateMeta() error {
 				h.Name,
 				h.AStr(),
 				err.Error())
-			return err
+			return
 		}
 
 		cnt++
+	}
+} // func (m *MetaEngine) guessLocation()
 
+func (m *Engine) guessOS() {
+	var (
+		err       error
+		db        *database.Database
+		svcMap    map[int64][]*model.Service
+		updateCnt int
+	)
+
+	m.log.Println("[DEBUG] Attempting to guess OS of Hosts we scanned.")
+
+	// db = m.pool.Get()
+	// defer m.pool.Put(db)
+	if db, err = database.Open(common.DbPath); err != nil {
+		m.log.Printf("[ERROR] Failed to open database: %s\n",
+			err.Error())
+		return
+	}
+	defer db.Close() // nolint: errcheck
+
+	if svcMap, err = db.ServiceGetSuccessByHost(); err != nil {
+		m.log.Printf("[ERROR] Could not load list of scanned ports: %s\n",
+			err.Error())
+		return
 	}
 
-	// status = true
-	return nil
-} // func (m *MetaEngine) updateMeta()
+	m.log.Printf("[DEBUG] Gonna process %d responses from scanned ports\n",
+		len(svcMap))
+
+	for id, ports := range svcMap {
+		var host *model.Host
+
+		if host, err = db.HostGetByID(id); err != nil {
+			m.log.Printf("[ERROR] Failed to get Host %d: %s\n",
+				id,
+				err.Error())
+			continue
+		} else if host == nil {
+			m.log.Printf("[CANTHAPPEN] Did not find Host %d in database\n",
+				id)
+			continue
+		}
+
+		var (
+			hits = make(map[string]int, len(osList))
+			ok   bool
+		)
+
+		for _, port := range ports {
+			for name, patterns := range osPatterns {
+				for _, pat := range patterns {
+					if pat.MatchString(port.Response) {
+						var cnt = hits[name]
+						hits[name] = cnt + 1
+						ok = true
+					}
+				}
+			}
+		}
+
+		if !ok {
+			continue
+		}
+
+		var (
+			name string
+			cnt  int
+		)
+
+		for n, c := range hits {
+			if c > cnt {
+				name = n
+				cnt = c
+			}
+		}
+
+		if cnt == 0 || name == host.Sysname {
+			continue
+		} else if err = db.HostUpdateSysname(host, name); err != nil {
+			m.log.Printf("[ERROR] Failed to update Sysname for Host %s/%s to %s: %s\n",
+				host.Name,
+				host.AStr(),
+				name,
+				err.Error())
+
+		} else {
+			updateCnt++
+			m.log.Printf("[DEBUG] Host %s/%s appears to be running %s\n",
+				host.Name,
+				host.AStr(),
+				name)
+		}
+	}
+
+	m.log.Printf("[INFO] Updated OS on %d Hosts.\n", updateCnt)
+} // func (m *Engine) guessOS()
 
 // LookupCountry attempts to determine what county a Host is located in.
 func (m *Engine) LookupCountry(h *model.Host) (string, error) {
@@ -355,17 +425,17 @@ func (m *Engine) LookupCity(h *model.Host) (string, error) {
 	return city.City.Names.German, nil
 } // func (m *MetaEngine) LookupCity(h *Host) (string, error)
 
-// LookupOperatingSystem attempts to determine what OS a Host is running.
-// func (m *MetaEngine) LookupOperatingSystem(h *data.HostWithPorts) string {
+// // LookupOperatingSystem attempts to determine what OS a Host is running.
+// func (m *Engine) LookupOperatingSystem(h *model.Host, ports map[uint16]*model.Service) string {
 // 	var results map[string]int = make(map[string]int)
 
 // PORT:
-// 	for _, port := range h.Ports {
+// 	for _, port := range ports {
 // 		//for os, patterns := range osPatterns {
 // 		for _, osname := range osList {
 // 			patterns := osPatterns[osname]
 // 			for _, pattern := range patterns {
-// 				if port.Reply != nil && pattern.MatchString(*port.Reply) {
+// 				if port.Response != "" && pattern.MatchString(port.Response) {
 // 					results[osname]++
 // 					continue PORT
 // 				}
@@ -386,9 +456,10 @@ func (m *Engine) LookupCity(h *model.Host) (string, error) {
 // 	}
 
 // 	return os
-// } // func (m *MetaEngine) LookupOperatingSystem(h *HostWithPorts) string
+// }
+// func (m *Engine) LookupOperatingSystem(h *model.Host, ports map[uint16]*model.Service) string
 
-// // UpdateMetadata refreshes the location and OS metadata for all hosts.
+// UpdateMetadata refreshes the location and OS metadata for all hosts.
 // func (m *MetaEngine) UpdateMetadata() error {
 // 	var (
 // 		err   error
