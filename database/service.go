@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-11 14:39:28 krylon>
+// Time-stamp: <2026-02-13 14:52:48 krylon>
 
 package database
 
@@ -262,3 +262,76 @@ EXEC_QUERY:
 
 	return ports, nil
 } // func (db *Database) ServiceGetSuccess() ([]*model.Service, error)
+
+// ServiceGetSuccessByHost returns a slice of all scanned ports grouped by Host.
+func (db *Database) ServiceGetSuccessByHost() (map[int64][]*model.Service, error) {
+	const qid query.ID = query.ServiceGetSuccess
+	var err error
+	var msg string
+	var stmt *sql.Stmt
+
+GET_QUERY:
+	if stmt, err = db.getQuery(qid); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto GET_QUERY
+		} else {
+			db.log.Printf("[ERROR] Error getting query %s: %s",
+				qid,
+				err.Error())
+			return nil, err
+		}
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var (
+		rows  *sql.Rows
+		ports = make(map[int64][]*model.Service)
+	)
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			time.Sleep(retryDelay)
+			goto EXEC_QUERY
+		} else {
+			msg = fmt.Sprintf("Error querying services: %s",
+				err.Error())
+			db.log.Println(msg)
+			return nil, errors.New(msg)
+		}
+	} else {
+		defer rows.Close() // nolint: errcheck
+	}
+
+	for rows.Next() {
+		var (
+			svc          = new(model.Service)
+			tstamp, port int64
+		)
+
+		if err = rows.Scan(
+			&svc.ID,
+			&svc.HostID,
+			&port,
+			&svc.Success,
+			&svc.Response,
+			&tstamp); err != nil {
+			msg = fmt.Sprintf("Error scanning row: %s", err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		svc.Port = uint16(port)
+		svc.Timestamp = time.Unix(tstamp, 0)
+
+		if ports[svc.HostID] == nil {
+			ports[svc.HostID] = make([]*model.Service, 0, 8)
+		}
+
+		ports[svc.HostID] = append(ports[svc.HostID], svc)
+	}
+
+	return ports, nil
+} // func (db *Database) ServiceGetSuccessByHost() ([]*model.Service, error)
