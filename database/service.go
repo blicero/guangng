@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-13 14:52:48 krylon>
+// Time-stamp: <2026-02-17 14:54:47 krylon>
 
 package database
 
@@ -131,6 +131,7 @@ EXEC_QUERY:
 			&svc.ID,
 			&port,
 			&svc.Success,
+			&svc.Response,
 			&tstamp); err != nil {
 			msg = fmt.Sprintf("Error scanning row: %s", err.Error())
 			db.log.Printf("[ERROR] %s\n", msg)
