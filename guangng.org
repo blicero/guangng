@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-14 16:27:25 krylon>
+# Time-stamp: <2026-02-16 16:01:40 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -8,7 +8,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* GuangNG [20/22]
+* GuangNG [20/23]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -207,11 +207,24 @@
      CLOCK: [2026-02-10 Di 18:38]--[2026-02-10 Di 19:06] =>  0:28
      CLOCK: [2026-02-09 Mo 14:59]--[2026-02-09 Mo 15:18] =>  0:19
      :END:
-** Features [11/12]                                                 :feature:
+** Features [11/13]                                                 :feature:
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
+*** TODO Use custom DNS resolver
+    Works a little bit like this:
+    +BEGIN_SRC go
+    r := &net.Resolver{
+        PreferGo: true,
+        Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+            d := net.Dialer{
+                Timeout: time.Millisecond * time.Duration(10000),
+            }
+            return d.DialContext(ctx, network, "8.8.8.8:53")
+        },
+    }
+    +END_SRC
 *** Analysis [1/2]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
