@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-13 15:14:57 krylon>
+// Time-stamp: <2026-02-18 17:07:05 krylon>
 
 package scanner
 
@@ -34,7 +34,7 @@ func (scn *Scanner) probePort(host *model.Host, port uint16) (*scanResult, error
 		return scn.scanDNS(host, port)
 	case 79:
 		return scn.scanFinger(host, port)
-	case 80, 443, 8000, 8080:
+	case 80, 443, 631, 1024, 4444, 8000, 8080:
 		return scn.scanHTTP(host, port)
 	case 161:
 		return scn.scanSNMP(host, port)
