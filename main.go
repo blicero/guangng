@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-30 15:16:15 krylon>
+// Time-stamp: <2026-02-19 18:36:32 krylon>
 
 package main
 
@@ -11,10 +11,12 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"regexp"
 	"syscall"
 	"time"
 
 	"github.com/blicero/guangng/common"
+	"github.com/blicero/guangng/generator"
 	"github.com/blicero/guangng/nexus"
 	"github.com/blicero/guangng/web"
 )
@@ -33,6 +35,8 @@ func printVer() {
 		common.BuildStamp.Format(common.TimestampFormat))
 }
 
+var nsPat = regexp.MustCompile(":\\d+$")
+
 func main() {
 	printVer()
 
@@ -44,6 +48,7 @@ func main() {
 		version                bool
 		addr, defaultAddr      string
 		delay                  int
+		resolver               string
 	)
 
 	defaultAddr = fmt.Sprintf("[::1]:%d", common.WebPort)
@@ -55,11 +60,24 @@ func main() {
 	flag.BoolVar(&version, "version", false, "Display the version number and exit")
 	flag.StringVar(&addr, "addr", defaultAddr, "Address for the web UI to listen on")
 	flag.IntVar(&delay, "delay", 5, "Delay before starting all the moving parts")
+	flag.StringVar(&resolver, "nameserver", "", "Nameserver to use for the Host generator")
 
 	flag.Parse()
 
 	if version {
 		os.Exit(0)
+	}
+
+	if resolver != "" {
+		fmt.Fprintf(
+			os.Stderr,
+			"Using custom resolver %q\n",
+			resolver)
+		if !nsPat.MatchString(resolver) {
+			generator.Nameserver = resolver + ":53"
+		} else {
+			generator.Nameserver = resolver
+		}
 	}
 
 	if nx, err = nexus.New(aCnt, nCnt, xCnt, sCnt); err != nil {

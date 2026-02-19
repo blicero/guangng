@@ -2,17 +2,17 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-03 20:11:18 krylon>
+// Time-stamp: <2026-02-19 19:36:48 krylon>
 
 package generator
 
 import (
+	"context"
 	"crypto/rand"
 	"log"
 	"net"
 	"regexp"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -80,12 +80,16 @@ func (c *cache) check(addr net.IP) (bool, error) {
 	return present, err
 } // func (c *cache) check(addr net.IP) bool
 
+// Nameserver contains the address of a nameserver to use for resolving
+// generated IP addresses to names.
+// If it is empty, the operating system's default nameserver is used.
+var Nameserver string
+
 // Generator generates random Hosts, checking them against blacklists
 // and ensuring that the IP address resolves to a valid PTR (i.e. that the
 // generated Host is likely to exist on the Internet).
 type Generator struct {
 	log                      *log.Logger
-	lock                     sync.RWMutex
 	cache                    *cache
 	blAddr                   *blacklist.BlacklistAddr
 	blName                   *blacklist.BlacklistName
@@ -98,6 +102,14 @@ type Generator struct {
 	ctlQAddr                 chan bool
 	ctlQName                 chan bool
 }
+
+func getNameserver(ctx context.Context, network, addr string) (net.Conn, error) {
+	d := net.Dialer{
+		Timeout: time.Second * 20,
+	}
+
+	return d.DialContext(ctx, network, Nameserver)
+} // func getNameserver(ctx context.Context, network, addr string) (net.Conn, error)
 
 // New creates a new Generator.
 // iCnt is the number of goroutines to spawn for generating IP addresses
@@ -161,13 +173,13 @@ func (gen *Generator) getID() int {
 	return int(val)
 } // func (gen *Generator) getID() int
 
-// StartAddrworker stars another address generation worker.
+// StartAddrWorker stars another address generation worker.
 func (gen *Generator) StartAddrWorker() {
 	gen.log.Println("[DEBUG] Start one address worker...")
 	go gen.addrWorker(gen.getID())
 } // func (gen *Generator) StartAddrWorker()
 
-// StartNameworker starts another name resolution worker.
+// StartNameWorker starts another name resolution worker.
 func (gen *Generator) StartNameWorker() {
 	var id = gen.getID()
 	go gen.nameWorker(id)
@@ -193,6 +205,7 @@ func (gen *Generator) IsActive() bool {
 	return gen.active.Load()
 } // func (gen *Generator) IsActive() bool
 
+// WorkerCount returns the number of active workers.
 func (gen *Generator) WorkerCount() int {
 	return int(gen.addrGenCnt.Load() + gen.nameGenCnt.Load())
 } // func (gen *Generator) WorkerCount() int
@@ -207,6 +220,7 @@ func (gen *Generator) NameWorkerCount() int {
 	return int(gen.nameGenCnt.Load())
 } // func (gen *Generator) NameWorkerCount() int
 
+// System returns the ID of the subsystem, i.e. subsystem.Generator
 func (gen *Generator) System() subsystem.ID {
 	return subsystem.Generator
 } // func (gen *Generator) System() subsystem.ID
@@ -303,6 +317,7 @@ func (gen *Generator) nameWorker(id int) {
 		addr   net.IP
 		host   *model.Host
 		ticker *time.Ticker
+		res    *net.Resolver
 	)
 
 	gen.nameGenCnt.Add(1)
@@ -312,6 +327,18 @@ func (gen *Generator) nameWorker(id int) {
 		id,
 		gen.nameGenCnt.Load())
 	defer gen.log.Printf("[DEBUG] addrWorker#%d is quitting.", id)
+
+	if Nameserver != "" {
+		// gen.log.Printf("[INFO] Use custom DNS Resolver @%s\n",
+		// 	Nameserver)
+		res = &net.Resolver{
+			PreferGo: true,
+			Dial:     getNameserver,
+		}
+	} else {
+		// gen.log.Printf("[INFO] Use system default resolver\n")
+		res = &net.Resolver{PreferGo: true}
+	}
 
 	ticker = time.NewTicker(common.ActiveTimeout)
 	defer ticker.Stop()
@@ -323,7 +350,7 @@ func (gen *Generator) nameWorker(id int) {
 		case <-gen.ctlQName:
 			return
 		case addr = <-gen.ipQ:
-			if host, err = gen.processAddr(addr); err != nil {
+			if host, err = gen.processAddr(res, addr); err != nil {
 				if !ignoreErr(err) {
 					gen.log.Printf("[ERROR] nameWorker#%d failed to process IP address %s: %s\n",
 						id,
@@ -339,25 +366,22 @@ func (gen *Generator) nameWorker(id int) {
 } // func (gen *Generator) nameWorker(id int)
 
 func ignoreErr(err error) bool {
-	var (
-		res bool
-		msg = err.Error()
-	)
+	var msg = err.Error()
 
-	if strings.HasSuffix(msg, "no such host") {
-		res = true
-	} else if strings.HasSuffix(msg, "Temporary failure in name resolution") {
-		res = true
-	}
-
-	return res
+	return strings.HasSuffix(msg, "no such host") ||
+		strings.HasSuffix(msg, "server misbehaving") ||
+		strings.HasSuffix(msg, "Temporary failure in name resolution") ||
+		strings.HasSuffix(msg, "i/o timeout")
 } // func ignoreErr(err error) bool
 
 func isTransient(err error) bool {
-	return strings.HasSuffix(err.Error(), "Temporary failure in name resolution")
+	var msg = err.Error()
+	return strings.HasSuffix(msg, "Temporary failure in name resolution") ||
+		strings.HasSuffix(msg, "i/o timeout") ||
+		strings.HasSuffix(msg, "server misbehaving")
 } // func isTransient(err error) bool
 
-func (gen *Generator) processAddr(addr net.IP) (*model.Host, error) {
+func (gen *Generator) processAddr(res *net.Resolver, addr net.IP) (*model.Host, error) {
 	const (
 		maxErr     = 5
 		retryDelay = time.Millisecond * 250
@@ -366,10 +390,15 @@ func (gen *Generator) processAddr(addr net.IP) (*model.Host, error) {
 		err    error
 		errCnt int
 		names  []string
+		ctx    context.Context
+		fn     context.CancelFunc
 	)
 
+	ctx, fn = context.WithTimeout(context.Background(), time.Second*25)
+	defer fn()
+
 RESOLVE:
-	if names, err = net.LookupAddr(addr.String()); err != nil {
+	if names, err = res.LookupAddr(ctx, addr.String()); err != nil {
 		if isTransient(err) {
 			if errCnt < maxErr {
 				errCnt++
