@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-16 16:01:40 krylon>
+# Time-stamp: <2026-02-19 21:07:08 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -8,19 +8,19 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* GuangNG [20/23]
+* GuangNG [21/23]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-14 Sa 16:27]
+   #+CAPTION: Clock summary at [2026-02-19 Do 21:07]
    | Headline                                      | Time      |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *Total time*                                  | *3d 2:50* |           |       |      |
+   | *Total time*                                  | *3d 5:31* |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *GuangNG [20/22]*                             | *3d 2:50* |           |       |      |
+   | *GuangNG [21/23]*                             | *3d 5:31* |           |       |      |
    | \_  /Components [5/5]/                        |           | /2d 3:23/ |       |      |
    | \_    Main [0/0]                              |           |           |  0:15 |      |
    | \_    Model [0/0]                             |           |           |  1:37 |      |
@@ -37,7 +37,8 @@
    | \_      Introspection                         |           |           |       | 4:38 |
    | \_    Web UI [0/0]                            |           |           |  9:39 |      |
    | \_      By Port                               |           |           |       | 0:47 |
-   | \_  /Features [11/12]/                        |           | /16:21/   |       |      |
+   | \_  /Features [12/13]/                        |           | /19:02/   |       |      |
+   | \_    Use custom DNS resolver                 |           |           |  2:41 |      |
    | \_    Analysis [1/2]                          |           |           | 10:21 |      |
    | \_      Determine location                    |           |           |       | 6:26 |
    | \_      Attempt to guess operating system     |           |           |       | 3:55 |
@@ -207,12 +208,17 @@
      CLOCK: [2026-02-10 Di 18:38]--[2026-02-10 Di 19:06] =>  0:28
      CLOCK: [2026-02-09 Mo 14:59]--[2026-02-09 Mo 15:18] =>  0:19
      :END:
-** Features [11/13]                                                 :feature:
+** Features [12/13]                                                 :feature:
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** TODO Use custom DNS resolver
+*** DONE Use custom DNS resolver
+    CLOSED: [2026-02-19 Do 21:06]
+    :LOGBOOK:
+    CLOCK: [2026-02-19 Do 17:51]--[2026-02-19 Do 20:06] =>  2:15
+    CLOCK: [2026-02-19 Do 16:47]--[2026-02-19 Do 17:13] =>  0:26
+    :END:
     Works a little bit like this:
     +BEGIN_SRC go
     r := &net.Resolver{
