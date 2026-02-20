@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-02 16:46:30 krylon>
+// Time-stamp: <2026-02-20 15:38:30 krylon>
 
 // Package scanner implements scanning ports. Duh.
 package scanner
@@ -42,10 +42,14 @@ var Ports []uint16 = []uint16{
 	143,
 	161,
 	443,
+	587,
 	631,
 	1024,
-	4444,
+	2222,
+	2322,
 	2525,
+	3270,
+	4444,
 	5353,
 	5800,
 	5900,

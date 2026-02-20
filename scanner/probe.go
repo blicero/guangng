@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-18 17:07:05 krylon>
+// Time-stamp: <2026-02-20 15:38:22 krylon>
 
 package scanner
 
@@ -25,7 +25,7 @@ import (
 
 func (scn *Scanner) probePort(host *model.Host, port uint16) (*scanResult, error) {
 	switch port {
-	case 21, 22, 25, 110, 143, 2525:
+	case 21, 22, 25, 110, 143, 2222, 2322, 2525:
 		// simple plaintext scan
 		return scn.scanPlain(host, port)
 	case 23, 3270, 9023:
