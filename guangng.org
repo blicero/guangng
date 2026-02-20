@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-19 21:07:08 krylon>
+# Time-stamp: <2026-02-20 15:54:44 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -8,20 +8,20 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* GuangNG [21/23]
+* GuangNG [22/23]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-19 Do 21:07]
+   #+CAPTION: Clock summary at [2026-02-20 Fr 15:54]
    | Headline                                      | Time      |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *Total time*                                  | *3d 5:31* |           |       |      |
+   | *Total time*                                  | *3d 5:47* |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *GuangNG [21/23]*                             | *3d 5:31* |           |       |      |
-   | \_  /Components [5/5]/                        |           | /2d 3:23/ |       |      |
+   | *GuangNG [22/23]*                             | *3d 5:47* |           |       |      |
+   | \_  /Components [5/5]/                        |           | /2d 3:39/ |       |      |
    | \_    Main [0/0]                              |           |           |  0:15 |      |
    | \_    Model [0/0]                             |           |           |  1:37 |      |
    | \_    Database [1/1]                          |           |           |  6:14 |      |
@@ -32,14 +32,14 @@
    | \_      Sanity-check zones for XFR            |           |           |       | 0:47 |
    | \_      Handle counting workers more...       |           |           |       | 2:11 |
    | \_    XFR [0/0]                               |           |           |  5:52 |      |
-   | \_    Scanner [0/0]                           |           |           |  8:35 |      |
+   | \_    Scanner [0/0]                           |           |           |  8:51 |      |
    | \_    Nexus [1/1]                             |           |           |  6:24 |      |
    | \_      Introspection                         |           |           |       | 4:38 |
    | \_    Web UI [0/0]                            |           |           |  9:39 |      |
    | \_      By Port                               |           |           |       | 0:47 |
-   | \_  /Features [12/13]/                        |           | /19:02/   |       |      |
+   | \_  /Features [13/13]/                        |           | /19:02/   |       |      |
    | \_    Use custom DNS resolver                 |           |           |  2:41 |      |
-   | \_    Analysis [1/2]                          |           |           | 10:21 |      |
+   | \_    Analysis [2/2]                          |           |           | 10:21 |      |
    | \_      Determine location                    |           |           |       | 6:26 |
    | \_      Attempt to guess operating system     |           |           |       | 3:55 |
    | \_    Allow starting subsystems with zero...  |           |           |  0:43 |      |
@@ -157,6 +157,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2026-02-20 Fr 15:37]--[2026-02-20 Fr 15:53] =>  0:16
     CLOCK: [2026-01-25 So 18:17]--[2026-01-25 So 19:03] =>  0:46
     CLOCK: [2026-01-24 Sa 13:43]--[2026-01-24 Sa 17:57] =>  4:14
     CLOCK: [2026-01-23 Fr 16:47]--[2026-01-23 Fr 18:45] =>  1:58
@@ -208,7 +209,7 @@
      CLOCK: [2026-02-10 Di 18:38]--[2026-02-10 Di 19:06] =>  0:28
      CLOCK: [2026-02-09 Mo 14:59]--[2026-02-09 Mo 15:18] =>  0:19
      :END:
-** Features [12/13]                                                 :feature:
+** Features [13/13]                                                 :feature:
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -231,7 +232,7 @@
         },
     }
     +END_SRC
-*** Analysis [1/2]
+*** Analysis [2/2]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -244,7 +245,8 @@
      CLOCK: [2026-02-11 Mi 14:30]--[2026-02-11 Mi 14:33] =>  0:03
      CLOCK: [2026-02-10 Di 19:35]--[2026-02-10 Di 22:25] =>  2:50
      :END:
-**** TODO Attempt to guess operating system
+**** DONE Attempt to guess operating system
+     CLOSED: [2026-02-20 Fr 15:54]
      :LOGBOOK:
      CLOCK: [2026-02-13 Fr 14:39]--[2026-02-13 Fr 17:27] =>  2:48
      CLOCK: [2026-02-12 Do 15:38]--[2026-02-12 Do 16:45] =>  1:07
