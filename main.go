@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-19 18:36:32 krylon>
+// Time-stamp: <2026-02-27 17:21:59 krylon>
 
 package main
 
@@ -48,7 +48,7 @@ func main() {
 		version                bool
 		addr, defaultAddr      string
 		delay                  int
-		resolver               string
+		resolver, dir          string
 	)
 
 	defaultAddr = fmt.Sprintf("[::1]:%d", common.WebPort)
@@ -61,11 +61,24 @@ func main() {
 	flag.StringVar(&addr, "addr", defaultAddr, "Address for the web UI to listen on")
 	flag.IntVar(&delay, "delay", 5, "Delay before starting all the moving parts")
 	flag.StringVar(&resolver, "nameserver", "", "Nameserver to use for the Host generator")
+	flag.StringVar(&dir, "dir", common.BaseDir, "Folder the application environment lives in")
 
 	flag.Parse()
 
 	if version {
 		os.Exit(0)
+	}
+
+	if dir != common.BaseDir {
+		if err = common.SetBaseDir(dir); err != nil {
+			fmt.Fprintf(
+				os.Stderr,
+				"Failed to set application environment to %s: %s\n",
+				dir,
+				err.Error(),
+			)
+			os.Exit(1)
+		}
 	}
 
 	if resolver != "" {
