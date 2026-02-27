@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-02-20 15:54:44 krylon>
+# Time-stamp: <2026-02-27 18:37:01 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -8,19 +8,19 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* GuangNG [22/23]
+* GuangNG [24/26]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-02-20 Fr 15:54]
+   #+CAPTION: Clock summary at [2026-02-27 Fr 18:36]
    | Headline                                      | Time      |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *Total time*                                  | *3d 5:47* |           |       |      |
+   | *Total time*                                  | *3d 7:16* |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *GuangNG [22/23]*                             | *3d 5:47* |           |       |      |
+   | *GuangNG [24/26]*                             | *3d 7:16* |           |       |      |
    | \_  /Components [5/5]/                        |           | /2d 3:39/ |       |      |
    | \_    Main [0/0]                              |           |           |  0:15 |      |
    | \_    Model [0/0]                             |           |           |  1:37 |      |
@@ -49,11 +49,14 @@
    | \_    Control starting/stopping subsystems... |           |           |  5:17 |      |
    | \_      Web                                   |           |           |       | 2:39 |
    | \_      XFR                                   |           |           |       | 0:18 |
-   | \_  /Bugs [4/5]/                              |           | /7:06/    |       |      |
+   | \_  /Bugs [6/8]/                              |           | /8:35/    |       |      |
    | \_    Data Race in Blacklist                  |           |           |  0:14 |      |
    | \_    Does the XFR engine actually work?      |           |           |  6:13 |      |
    | \_    Query XFRAdd did not return a value     |           |           |  0:13 |      |
    | \_    Segmentation Violation Blues            |           |           |  0:26 |      |
+   | \_    Some minor refinements [2/2]            |           |           |  1:29 |      |
+   | \_      Cut down on the logging output        |           |           |       | 0:41 |
+   | \_      Make the application directory...     |           |           |       | 0:48 |
    #+END:
 ** Components [5/5]
    :PROPERTIES:
@@ -302,7 +305,7 @@
      :LOGBOOK:
      CLOCK: [2026-02-04 Mi 14:20]--[2026-02-04 Mi 14:38] =>  0:18
      :END:
-** Bugs [4/5]
+** Bugs [6/8]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -342,3 +345,15 @@
     :LOGBOOK:
     CLOCK: [2026-01-26 Mo 15:23]--[2026-01-26 Mo 15:49] =>  0:26
     :END:
+*** TODO Some minor refinements [2/2]
+**** DONE Cut down on the logging output
+     CLOSED: [2026-02-27 Fr 18:36]
+     :LOGBOOK:
+     CLOCK: [2026-02-27 Fr 18:07]--[2026-02-27 Fr 18:36] =>  0:29
+     CLOCK: [2026-02-27 Fr 17:07]--[2026-02-27 Fr 17:19] =>  0:12
+     :END:
+**** DONE Make the application directory configurable
+     CLOSED: [2026-02-27 Fr 18:07]
+     :LOGBOOK:
+     CLOCK: [2026-02-27 Fr 17:19]--[2026-02-27 Fr 18:07] =>  0:48
+     :END:
