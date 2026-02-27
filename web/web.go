@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-10 20:31:17 krylon>
+// Time-stamp: <2026-02-27 18:15:25 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -309,7 +309,7 @@ func (srv *Server) handleByPort(w http.ResponseWriter, r *http.Request) {
 //////////////////////////////////////////////////////////////////////////////
 
 func (srv *Server) handleLoadWorkerCount(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handling request for %s\n", r.RequestURI)
+	// srv.log.Printf("[TRACE] Handling request for %s\n", r.RequestURI)
 	var (
 		err error
 		res = ajaxWorkerCnt{

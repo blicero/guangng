@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-05 14:56:49 krylon>
+// Time-stamp: <2026-02-27 18:09:15 krylon>
 
 // Package xfr handles zone transfers, an attempt to get more Hosts into the
 // database, as the Generator itself is kind of slow.
@@ -179,8 +179,9 @@ func (x *XFR) xfrFeeder() {
 			batchSize = int(x.xcnt.Load())
 		)
 
-		x.log.Printf("[TRACE] Query for up to %d unfinished XFRs\n", batchSize)
-		if batchSize == 0 {
+		if batchSize > 0 {
+			x.log.Printf("[TRACE] Query for up to %d unfinished XFRs\n", batchSize)
+		} else if batchSize == 0 {
 			if !x.active.Load() {
 				return
 			}
