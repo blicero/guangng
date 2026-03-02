@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-19 19:36:48 krylon>
+// Time-stamp: <2026-03-02 13:13:37 krylon>
 
 package generator
 
@@ -473,8 +473,8 @@ func (gen *Generator) checkXFR(host *model.Host, db *database.Database) {
 	)
 
 	if tldPat.MatchString(dns) {
-		gen.log.Printf("[DEBUG] Zone %s looks like a top-level domain, so we skip it.\n",
-			dns)
+		// gen.log.Printf("[DEBUG] Zone %s looks like a top-level domain, so we skip it.\n",
+		// 	dns)
 		return
 	} else if xfr, err = db.XFRGetByName(dns); err != nil {
 		gen.log.Printf("[ERROR] Failed to look up XFR of zone %s: %s\n",
