@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 02. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-13 17:03:01 krylon>
+// Time-stamp: <2026-03-02 13:01:16 krylon>
 
 // Package meta provides facilities to guesstimate the locations and operating
 // systems of Hosts.
@@ -37,6 +37,7 @@ var osList = []string{ // nolint: unused
 	"Debian",
 	"CentOS",
 	"Red Hat",
+	"Suse Linux",
 	"Fedora",
 	"Yocto",
 	"FreeBSD",
@@ -72,6 +73,9 @@ var osPatterns = map[string][]*regexp.Regexp{ // nolint: unused
 	},
 	"Fedora": {
 		regexp.MustCompile("(?i)fedora"),
+	},
+	"Suse Linux": {
+		regexp.MustCompile("(?i)SUSE Linux"),
 	},
 	"Yocto Linux": {
 		regexp.MustCompile("(?i)yocto"),
