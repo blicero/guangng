@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-03-02 14:33:13 krylon>
+# Time-stamp: <2026-03-02 15:03:26 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -307,7 +307,7 @@
      :LOGBOOK:
      CLOCK: [2026-02-04 Mi 14:20]--[2026-02-04 Mi 14:38] =>  0:18
      :END:
-** Bugs [6/8]
+** Bugs [7/8]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -317,12 +317,15 @@
     :LOGBOOK:
     CLOCK: [2026-02-05 Do 14:19]--[2026-02-05 Do 14:33] =>  0:14
     :END:
-*** TODO Badger barfs on 32-bit system
+*** FAILED Badger barfs on 32-bit system
+    CLOSED: [2026-03-02 Mo 15:01]
     :LOGBOOK:
     CLOCK: [2026-03-02 Mo 13:21]--[2026-03-02 Mo 14:33] =>  1:12
     :END:
     I encountered this on OpenBSD/386, but I have a hunch it's not about
     OpenBSD but about 32-vs-64 bits.
+    *Update* I give up. I have no idea if it's a bug in badger or if there is
+    some setting I need to use. Whatever. GuangNG is 64-bit-only from now on.
 *** SUSPENDED Does the XFR engine actually work?
     CLOSED: [2026-02-07 Sa 15:53]
     :LOGBOOK:
