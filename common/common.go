@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-02-27 18:57:06 krylon>
+// Time-stamp: <2026-03-02 13:12:19 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -36,7 +36,7 @@ import (
 // application.
 const (
 	AppName                  = "GuangNG"
-	Version                  = "0.7.1"
+	Version                  = "0.7.2"
 	Debug                    = true
 	DefaultPort              = 6942
 	TimestampFormatMinute    = "2006-01-02 15:04"
