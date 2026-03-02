@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2026-03-02 13:11:42 krylon>
+# Time-stamp: <2026-03-02 14:33:13 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -15,12 +15,12 @@
   :END:
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 255 :emphasize t
-   #+CAPTION: Clock summary at [2026-03-02 Mo 13:11]
+   #+CAPTION: Clock summary at [2026-03-02 Mo 14:33]
    | Headline                                      | Time      |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *Total time*                                  | *3d 7:29* |           |       |      |
+   | *Total time*                                  | *3d 8:41* |           |       |      |
    |-----------------------------------------------+-----------+-----------+-------+------|
-   | *GuangNG [24/26]*                             | *3d 7:29* |           |       |      |
+   | *GuangNG [24/26]*                             | *3d 8:41* |           |       |      |
    | \_  /Components [5/5]/                        |           | /2d 3:39/ |       |      |
    | \_    Main [0/0]                              |           |           |  0:15 |      |
    | \_    Model [0/0]                             |           |           |  1:37 |      |
@@ -49,8 +49,9 @@
    | \_    Control starting/stopping subsystems... |           |           |  5:17 |      |
    | \_      Web                                   |           |           |       | 2:39 |
    | \_      XFR                                   |           |           |       | 0:18 |
-   | \_  /Bugs [6/8]/                              |           | /8:35/    |       |      |
+   | \_  /Bugs [6/8]/                              |           | /9:47/    |       |      |
    | \_    Data Race in Blacklist                  |           |           |  0:14 |      |
+   | \_    Badger barfs on 32-bit system           |           |           |  1:12 |      |
    | \_    Does the XFR engine actually work?      |           |           |  6:13 |      |
    | \_    Query XFRAdd did not return a value     |           |           |  0:13 |      |
    | \_    Segmentation Violation Blues            |           |           |  0:26 |      |
@@ -317,6 +318,9 @@
     CLOCK: [2026-02-05 Do 14:19]--[2026-02-05 Do 14:33] =>  0:14
     :END:
 *** TODO Badger barfs on 32-bit system
+    :LOGBOOK:
+    CLOCK: [2026-03-02 Mo 13:21]--[2026-03-02 Mo 14:33] =>  1:12
+    :END:
     I encountered this on OpenBSD/386, but I have a hunch it's not about
     OpenBSD but about 32-vs-64 bits.
 *** SUSPENDED Does the XFR engine actually work?
