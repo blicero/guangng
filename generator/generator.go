@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-03-02 13:13:37 krylon>
+// Time-stamp: <2026-03-02 14:03:07 krylon>
 
 package generator
 
@@ -23,7 +23,7 @@ import (
 	"github.com/blicero/guangng/model"
 	"github.com/blicero/guangng/model/hsrc"
 	"github.com/blicero/guangng/model/subsystem"
-	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/v4"
 )
 
 type cache struct {
@@ -35,11 +35,16 @@ func openCache() (*cache, error) {
 	var (
 		err     error
 		ipcache = new(cache)
+		options badger.Options
 	)
 
 	if ipcache.log, err = common.GetLogger(logdomain.IPCache); err != nil {
 		return nil, err
-	} else if ipcache.db, err = badger.Open(badger.DefaultOptions(common.CachePath)); err != nil {
+	}
+
+	options = badger.DefaultOptions(common.CachePath) // .WithMemTableSize(2 << 23)
+
+	if ipcache.db, err = badger.Open(options); err != nil {
 		ipcache.log.Printf("[ERROR] Failed to open IP cache at %s: %s\n",
 			common.CachePath,
 			err.Error())
