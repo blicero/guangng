@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-29 20:52:35 krylon>
+// Time-stamp: <2026-06-27 11:49:42 krylon>
 
 // Package model provides the data types our application deals with.
 package model
@@ -34,6 +34,9 @@ type Host struct {
 // AStr returns a string representation of the Host's IP address.
 func (h *Host) AStr() string {
 	if h.astr == "" {
+		if h.Addr == nil {
+			return ""
+		}
 		h.astr = h.Addr.String()
 	}
 

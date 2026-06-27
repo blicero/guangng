@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 22. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-17 14:54:47 krylon>
+// Time-stamp: <2026-06-27 12:03:47 krylon>
 
 package database
 
@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/blicero/guangng/common"
 	"github.com/blicero/guangng/database/query"
 	"github.com/blicero/guangng/model"
 )
@@ -23,6 +24,12 @@ func (db *Database) ServiceAdd(h *model.Host, s *model.Service) error {
 		err  error
 		stmt *sql.Stmt
 	)
+
+	if h == nil {
+		return common.ErrNil
+	} else if s == nil {
+		return common.ErrNil
+	}
 
 	if stmt, err = db.getQuery(qid); err != nil {
 		db.log.Printf("[ERROR] Failed to prepare query %s: %s\n",

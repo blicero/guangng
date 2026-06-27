@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2026-03-02 13:12:19 krylon>
+// Time-stamp: <2026-06-27 12:03:30 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -50,6 +50,8 @@ const (
 	ActiveTimeout            = time.Second * 5
 	WebPort                  = 8919
 )
+
+var ErrNil error = errors.New("argument is nil")
 
 // LogLevels are the names of the log levels supported by the logger.
 var LogLevels = []logutils.LogLevel{

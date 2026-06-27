@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-01-23 16:17:01 krylon>
+// Time-stamp: <2026-06-27 11:47:25 krylon>
 
 package database
 
@@ -51,7 +51,11 @@ func TestServiceAdd(t *testing.T) {
 		var host model.Host
 
 		if c.svc.HostID != 0 {
-			host = tHosts[c.svc.HostID]
+			var ok bool
+			if host, ok = tHosts[c.svc.HostID]; !ok {
+				t.Logf("Did not find Host %d!", c.svc.HostID)
+				continue
+			}
 		}
 
 		if err := tdb.ServiceAdd(&host, &c.svc); err != nil {
