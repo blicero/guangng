@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 02. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-03-02 13:01:16 krylon>
+// Time-stamp: <2026-11-20 16:06:06 krylon>
 
 // Package meta provides facilities to guesstimate the locations and operating
 // systems of Hosts.
@@ -49,6 +49,7 @@ var osList = []string{ // nolint: unused
 	"JUNOS",
 	"Cisco IOS",
 	"SonicOS",
+	"IBM i",
 }
 
 var osPatterns = map[string][]*regexp.Regexp{ // nolint: unused
@@ -108,6 +109,9 @@ var osPatterns = map[string][]*regexp.Regexp{ // nolint: unused
 	"SonicOS": {
 		regexp.MustCompile("(?i)SonicOS"),
 		regexp.MustCompile("(?i)SonicWALL"),
+	},
+	"IBM i": {
+		regexp.MustCompile("(?i)IBM i"),
 	},
 }
 
