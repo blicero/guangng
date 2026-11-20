@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-02-27 18:15:25 krylon>
+// Time-stamp: <2026-06-27 12:57:02 krylon>
 
 // Package web provides a web-based UI.
 package web
@@ -531,8 +531,8 @@ func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request
 	// srv.log.Printf("[TRACE] Handle request for %s\n",
 	// 	request.URL.EscapedPath())
 
-	// Since we controll what static files the server has available, we
-	// can easily map MIME type to slice. Soon.
+	// Since we control what static files the server has
+	// available, we can easily map MIME type to slice. Soon.
 
 	vars := mux.Vars(request)
 	filename := vars["file"]
@@ -556,11 +556,12 @@ func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request
 
 	w.Header().Set("Content-Type", mimeType)
 
-	if common.Debug {
-		w.Header().Set("Cache-Control", noCache)
-	} else {
-		w.Header().Set("Cache-Control", cacheControl)
-	}
+	// if common.Debug {
+	// 	w.Header().Set("Cache-Control", noCache)
+	// } else {
+	// 	w.Header().Set("Cache-Control", cacheControl)
+	// }
+	w.Header().Set("Cache-Control", cacheControl)
 
 	var (
 		err error

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 01. 2026 by Benjamin Walkenhorst
 // (c) 2026 Benjamin Walkenhorst
-// Time-stamp: <2026-03-02 14:03:07 krylon>
+// Time-stamp: <2026-10-17 11:22:19 krylon>
 
 package generator
 
@@ -118,7 +118,7 @@ func getNameserver(ctx context.Context, network, addr string) (net.Conn, error) 
 
 // New creates a new Generator.
 // iCnt is the number of goroutines to spawn for generating IP addresses
-// wCnt is the number of goroutines to spawn for resolving and checking hostnames.
+// nCnt is the number of goroutines to spawn for resolving and checking hostnames.
 func New(icnt, ncnt int) (*Generator, error) {
 	var (
 		err error
